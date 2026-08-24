@@ -6,6 +6,7 @@ from typing import Optional
 import httpx
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -16,6 +17,15 @@ HTML_FILE=os.path.join(BASE_DIR,"index_render_backend.html")
 BOT_TOKEN=os.getenv("TELEGRAM_BOT_TOKEN","").strip()
 CHAT_ID=os.getenv("TELEGRAM_CHAT_ID","").strip()
 app=FastAPI(title="Proposal Backend")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 hits=defaultdict(list)
 LABELS={
  "page_opened":"📖 Proposal website opened",

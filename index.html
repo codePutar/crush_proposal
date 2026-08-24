@@ -222,6 +222,49 @@ const ids=screens.map(s=>s.id);
 const counter=document.getElementById('counter');
 const bar=document.getElementById('progressBar');
 const toast=document.getElementById('toast');
+
+// Render backend URL. Replace YOUR-RENDER-SERVICE with your actual Render service hostname.
+const BACKEND_URL = "https://crush-proposal.onrender.com";
+
+// Keep one stable visitor/session ID for this browser tab/session.
+let sessionId = sessionStorage.getItem("proposal_session_id");
+if (!sessionId) {
+  sessionId =
+    Date.now().toString(36) + "-" +
+    Math.random().toString(36).slice(2, 10);
+  sessionStorage.setItem("proposal_session_id", sessionId);
+}
+
+async function sendEvent(eventName) {
+  try {
+    const response = await fetch(`${BACKEND_URL}/api/event`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        event: eventName,
+        session_id: sessionId,
+        page: window.location.pathname,
+        client_time: new Date().toISOString()
+      })
+    });
+
+    if (!response.ok) {
+      console.error("Event failed:", response.status);
+    }
+  } catch (error) {
+    // Tracking must never interrupt the proposal flow.
+    console.error("Telegram event error:", error);
+  }
+}
+
+function trackAndNext(eventName, nextScreen) {
+  // Do not await analytics; screen transition stays instant.
+  sendEvent(eventName);
+  next(nextScreen);
+}
+
 const hints=[
   'Ek baar aur soch lo? 🥺',
   'Main bas honest hona chahta hoon… 👀',
@@ -272,10 +315,12 @@ function handleNoListen(){
   setTimeout(()=>toast.classList.remove('show'),1600);
 }
 function answerYes(){
+  sendEvent('final_yes');
   show('s6');
   celebrate();
 }
 function answerMaybe(){
+  sendEvent('final_need_time');
   show('s7');
   gentleHearts(7);
 }
