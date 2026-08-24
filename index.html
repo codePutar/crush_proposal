@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#fff8f8">
+<title>Vashnavi — Ek Baat Kehni Hai ❤️</title>
+<style>
+:root{
+  --bg:#fff9fa;
+  --bg2:#fff1f5;
+  --card:rgba(255,255,255,.78);
+  --ink:#3c2630;
+  --muted:#7d626c;
+  --rose:#c85a77;
+  --deep:#7e2745;
+  --soft:#f4c8d4;
+  --gold:#c8a262;
+  --shadow:0 22px 60px rgba(103,43,63,.14);
+  --radius:28px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 15% 10%,#fff 0,#fff8fa 38%,#fdeef3 100%);color:var(--ink);overflow-x:hidden}
+body{min-height:100svh}
+button{font:inherit}
+#bg{position:fixed;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.orb{position:absolute;border-radius:50%;filter:blur(2px);opacity:.6;animation:drift 12s ease-in-out infinite alternate}
+.orb.one{width:180px;height:180px;background:#f8d9e3;left:-70px;top:8%}
+.orb.two{width:240px;height:240px;background:#f7e3c8;right:-90px;top:44%;animation-delay:-4s}
+.orb.three{width:160px;height:160px;background:#ead7ef;left:20%;bottom:-90px;animation-delay:-8s}
+@keyframes drift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(18px,-22px,0) scale(1.08)}}
+.petals,.sparkles{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.petal{position:absolute;top:-50px;font-size:15px;opacity:.55;animation:fall linear infinite}
+@keyframes fall{0%{transform:translate3d(0,-10vh,0) rotate(0)}100%{transform:translate3d(var(--x),110vh,0) rotate(360deg)}}
+.spark{position:absolute;animation:twinkle 2.8s ease-in-out infinite;opacity:0;font-size:12px}
+@keyframes twinkle{0%,100%{opacity:0;transform:scale(.6)}50%{opacity:.8;transform:scale(1)}}
+.app{position:relative;z-index:5;min-height:100svh;padding:18px 14px 34px;display:flex;justify-content:center}
+.shell{width:min(100%,520px);display:flex;flex-direction:column;min-height:calc(100svh - 52px)}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:8px 2px 18px;color:#926b78;font-size:12px;letter-spacing:.09em;text-transform:uppercase}
+.brand{display:flex;gap:8px;align-items:center;font-weight:700}
+.brand-dot{width:8px;height:8px;border-radius:50%;background:var(--rose);box-shadow:0 0 0 6px rgba(200,90,119,.10)}
+.counter{font-variant-numeric:tabular-nums}
+.progress{height:4px;border-radius:999px;background:rgba(126,39,69,.08);overflow:hidden;margin-bottom:18px}
+.progress > span{display:block;height:100%;width:20%;background:linear-gradient(90deg,var(--rose),var(--gold));border-radius:999px;transition:width .6s ease}
+.screen{display:none;flex:1;animation:enter .65s cubic-bezier(.22,1,.36,1)}
+.screen.active{display:flex;flex-direction:column}
+@keyframes enter{from{opacity:0;transform:translateY(20px) scale(.985)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid rgba(255,255,255,.92);box-shadow:var(--shadow);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-radius:var(--radius);padding:28px 20px 22px;min-height:0}
+.center{text-align:center;align-items:center;justify-content:center}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--deep);font-weight:700;margin-bottom:16px}
+h1{font-family:Georgia,"Times New Roman",serif;font-weight:500;line-height:1.18;font-size:clamp(32px,8.2vw,46px);letter-spacing:-.03em;color:#4f2433;margin-bottom:14px}
+h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-height:1.35;margin-top:10px;letter-spacing:0}
+.lead{font-size:15px;line-height:1.75;color:var(--muted);max-width:390px;margin:0 auto 22px}
+.quote{font-family:Georgia,serif;font-style:italic;font-size:19px;line-height:1.55;color:#6d3b4b}
+.btns{display:flex;gap:10px;flex-direction:column;width:100%;margin-top:16px}
+.btn{border:0;border-radius:999px;min-height:54px;padding:0 20px;display:flex;align-items:center;justify-content:center;gap:8px;font-weight:750;letter-spacing:.01em;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
+.btn:active{transform:scale(.97)}
+.primary{background:linear-gradient(135deg,#b84566,#8d2b4c);color:#fff;box-shadow:0 15px 30px rgba(141,43,76,.22)}
+.secondary{background:#fff;color:#7e4657;border:1px solid #edd2db;box-shadow:0 8px 18px rgba(93,42,59,.06)}
+.ghost{background:transparent;color:#8d6e78;border:1px dashed #dfc4cd}
+.small-note{font-size:12px;color:#9b7e87;margin-top:14px;line-height:1.55}
+.heart{font-size:62px;line-height:1;animation:pulse 1.5s ease-in-out infinite;margin-bottom:18px;filter:drop-shadow(0 10px 18px rgba(194,67,105,.16))}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
+.tap-heart{font-size:22px;display:inline-block;animation:bob 1.2s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-4px) rotate(-5deg)}}
+.choice-card{margin-top:12px}
+.choice-title{font-family:Georgia,serif;font-size:25px;line-height:1.3;color:#522838;margin-bottom:8px}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:13px}
+.chip{padding:8px 12px;border-radius:999px;background:#fff;border:1px solid #f0d8df;color:#8c6975;font-size:12px}
+.photo-grid{display:grid;grid-template-columns:1.08fr .92fr;gap:10px;margin:4px 0 20px}
+.photo{position:relative;overflow:hidden;border-radius:20px;background:#f1e2e8;box-shadow:0 10px 26px rgba(74,29,46,.10)}
+.photo img{width:100%;height:100%;display:block;object-fit:cover}
+.photo.tall{grid-row:span 2;min-height:340px}
+.photo.small{height:165px}
+.photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(48,13,28,.28));pointer-events:none}
+.photo span{position:absolute;left:11px;bottom:10px;z-index:2;color:white;font-size:11px;font-weight:700;letter-spacing:.04em;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.section-tag{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:#fff2f5;color:#9b5067;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:13px}
+.letter{font-size:15px;line-height:1.85;color:#5e4650;text-align:left}
+.letter p{margin-bottom:15px}
+.letter strong{color:#7e2745}
+.final-card{padding-bottom:26px}
+.big-question{font-family:Georgia,serif;font-size:28px;line-height:1.25;color:#522838;margin:7px 0 16px}
+.final-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.final-actions .btn{min-height:52px;padding:0 12px;font-size:14px}
+.hidden{display:none!important}
+.reassure{font-size:12px;line-height:1.65;color:#8d7078;margin-top:14px}
+.end-icon{font-size:54px;margin-bottom:12px}
+.result-title{font-family:Georgia,serif;font-size:32px;color:#562b3a;margin-bottom:10px}
+#yesNo{position:fixed;inset:0;z-index:40;pointer-events:none;display:flex;align-items:center;justify-content:center;padding:22px}
+.toast{background:rgba(59,22,37,.95);color:#fff;border-radius:18px;padding:13px 16px;font-size:13px;line-height:1.4;max-width:330px;box-shadow:0 18px 40px rgba(0,0,0,.2);opacity:0;transform:translateY(12px);transition:.3s}
+.toast.show{opacity:1;transform:none}
+.confetti{position:fixed;z-index:50;pointer-events:none;font-size:18px;animation:confetti 1.9s cubic-bezier(.17,.67,.37,1) forwards}
+@keyframes confetti{0%{transform:translate3d(0,0,0) rotate(0);opacity:1}100%{transform:translate3d(var(--dx),var(--dy),0) rotate(420deg);opacity:0}}
+.footer{text-align:center;padding-top:14px;color:#ad8d98;font-size:10px;letter-spacing:.05em}
+@media (min-width:700px){.app{padding-top:30px}.card{padding:36px 32px 28px}.btns{max-width:390px;margin-left:auto;margin-right:auto}.topbar{padding-top:0}}
+@media (max-height:680px) and (max-width:520px){.card{padding:22px 16px 18px}h1{font-size:30px}.photo.tall{min-height:275px}.photo.small{height:132px}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="bg"><div class="orb one"></div><div class="orb two"></div><div class="orb three"></div></div>
+<div class="petals" id="petals"></div><div class="sparkles" id="sparkles"></div><div id="yesNo"><div class="toast" id="toast"></div></div>
+
+<main class="app">
+  <div class="shell">
+    <div class="topbar"><div class="brand"><span class="brand-dot"></span> for Vashnavi</div><div class="counter" id="counter">01 / 06</div></div>
+    <div class="progress"><span id="progressBar"></span></div>
+
+    <section class="screen active" id="s1">
+      <div class="card center" style="flex:1">
+        <div class="eyebrow">a tiny website, from a nervous person</div>
+        <div class="heart">♡</div>
+        <h1>Vashnavi,<br>mujhe tumse<br>ek baat kehni hai...<span class="soft">thodi si important hai ❤️</span></h1>
+        <p class="lead">Main ye baat kaafi time se kehna chahta tha… bas himmat thodi late aayi. 😅</p>
+        <div class="btns">
+          <button class="btn primary" onclick="trackAndNext('opened_message','s2')">Okay… bolo na <span class="tap-heart">→</span></button>
+        </div>
+        <div class="small-note">No pressure. Bas ek chhoti si honest baat. 🌷</div>
+      </div>
+    </section>
+
+    <section class="screen" id="s2">
+      <div class="card center" style="flex:1">
+        <div class="eyebrow">before i say it</div>
+        <div class="heart">💌</div>
+        <div class="choice-title">Do you want to listen?</div>
+        <p class="lead">Sach mein. 30 seconds ke liye meri baat sunogi? 👀</p>
+        <div class="btns">
+          <button class="btn primary" onclick="trackAndNext('listen_yes_1','s3')">Yes, bolo ❤️</button>
+          <button class="btn secondary" onclick="trackAndNext('listen_yes_2','s3')">Haan yaar, sun rahi hoon 🥹</button>
+          <button class="btn ghost" id="noListen" onclick="handleNoListen()">No 🙈</button>
+        </div>
+        <div class="small-note" id="listenHint">Ek honest baat hai… bas ek baar sun lena. 🌷</div>
+      </div>
+    </section>
+
+    <section class="screen" id="s3">
+      <div class="card" style="flex:1">
+        <div class="eyebrow">first, one thing</div>
+        <div class="section-tag">🫶 honestly</div>
+        <h1 style="font-size:32px">Pehle jo bhi hua…<span class="soft">usse thoda side mein rakhte hain.</span></h1>
+        <div class="letter">
+          <p>Yrr, mujhe pata hai ki ab sabko pata lag gaya hai or tumhe bhi ki mujhe tum par crush hai… aur honestly, uske baad kaafi kuch awkward ho gaya.</p>
+          <p>Main actually tumse <strong>private mein</strong> baat karna chahta tha. Kisi ko pata na lage, bas tum aur main. Lekin maine apne doston ko bata diya aur wahi meri galti thi. 😅</p>
+          <p>Toh jo bhi pehle hua, please usse meri actual baat se alag rakhna. Main bas tumse genuinely aur respectfully kehna chahta tha ki <strong>main kya feel karta hoon.</strong></p>
+        </div>
+        <div class="chips"><span class="chip">no drama</span><span class="chip">no pressure</span><span class="chip">just honest</span></div>
+        <div class="btns"><button class="btn primary" onclick="trackAndNext('continued_after_intro','s4')">Okay… ab asli baat ❤️</button></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s4">
+      <div class="card" style="flex:1">
+        <div class="eyebrow">the part i was scared to say</div>
+        <div class="photo-grid">
+          <div class="photo tall"><img src="image2.jpeg" alt="Vashnavi holding a baby"><span>you, being you 🌷</span></div>
+          <div class="photo small"><img src="image1.jpeg" alt="Vashnavi in a mirror selfie"><span>this one got me 🤍</span></div>
+          <div class="photo small"><img src="image3.jpeg" alt="Vashnavi at a cafe"><span>that whole vibe ✨</span></div>
+        </div>
+        <div class="letter">
+          <p>Yrr… <strong>I really, really like you.</strong> ❤️</p>
+          <p>Tum bohot sundar ho — meri nazar mein. Tumhari aankhein, tumhari smile, tumhari baatein… pata nahi, mujhe genuinely sab kuch bahut achha lagta hai.</p>
+          <p>Itni pyaari si ho tum ki kabhi-kabhi bas dekh ke hi smile aa jaati hai. 🥹</p>
+        </div>
+        <div class="btns"><button class="btn primary" onclick="trackAndNext('read_feelings','s5')">One last thing…</button></div>
+      </div>
+    </section>
+
+    <section class="screen" id="s5">
+      <div class="card" style="flex:1">
+        <div class="eyebrow">and this matters most</div>
+        <div class="section-tag">🌷 your choice</div>
+        <h1 style="font-size:31px">Main tumse “haan” force nahi kar raha.<span class="soft">decision tumhara hi hai.</span></h1>
+        <div class="letter">
+          <p>Bas meri ek honest si baat thi jo main dil mein nahi rakhna chahta tha.</p>
+          <p>Agar hum dono ka koi chance hua, toh main <strong>apna best dunga</strong>. Jaldi nahi, pressure nahi — bas genuinely effort karunga aur jo bhi hoga, dil se karunga.</p>
+          <p>Baaki… <strong>tum jo feel karti ho, wahi sabse important hai.</strong> ❤️</p>
+        </div>
+        <div class="choice-card">
+          <div class="big-question">So… kya kehti ho? 🫣</div>
+          <div class="final-actions">
+            <button class="btn primary" onclick="answerYes()">Haan ❤️</button>
+            <button class="btn secondary" onclick="answerMaybe()">Mujhe thoda time chahiye 🌷</button>
+          </div>
+          <div class="reassure">“Time chahiye” is completely okay. Main seriously mean kar raha hoon — no pressure.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="s6">
+      <div class="card center final-card" style="flex:1">
+        <div class="end-icon">🥹❤️</div>
+        <div class="eyebrow">my favorite answer</div>
+        <div class="result-title">Yeh smile screen pe nahi, real life mein chahiye.</div>
+        <p class="quote">“Baaki sab baad mein. Pehle ek proper private conversation — sirf tum aur main.”</p>
+        <div class="btns">
+          <button class="btn primary" onclick="celebrateAgain()">Okay, now smile 😭❤️</button>
+        </div>
+        <div class="small-note">Thank you for reading all the way till here.</div>
+      </div>
+    </section>
+
+    <section class="screen" id="s7">
+      <div class="card center final-card" style="flex:1">
+        <div class="end-icon">🌷</div>
+        <div class="eyebrow">that's completely okay</div>
+        <div class="result-title">Take your time.</div>
+        <p class="quote">“Mujhe bas tumhari honest feeling chahiye thi. Aur honestly, tumhara comfort mere liye important hai.”</p>
+        <div class="btns">
+          <button class="btn secondary" onclick="restart()">Read it again ↺</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="footer">made with a lot of nervousness &amp; a little bit of courage ✦</div>
+  </div>
+</main>
+
+<script>
+const screens=[...document.querySelectorAll('.screen')];
+const ids=screens.map(s=>s.id);
+const counter=document.getElementById('counter');
+const bar=document.getElementById('progressBar');
+const toast=document.getElementById('toast');
+const hints=[
+  'Ek baar aur soch lo? 🥺',
+  'Main bas honest hona chahta hoon… 👀',
+  'Okay okay… pressure nahi. But listen once? 🌷',
+  'Last little try. Promise. 😭'
+];
+let noCount=0;
+function show(id){
+  screens.forEach(s=>s.classList.toggle('active',s.id===id));
+  const n=ids.indexOf(id)+1;
+  const visualTotal=6;
+  counter.textContent=String(Math.min(n,visualTotal)).padStart(2,'0')+' / '+String(visualTotal).padStart(2,'0');
+  bar.style.width=Math.min(100,n/visualTotal*100)+'%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function next(id){
+  gentleHearts(5);
+  show(id);
+}
+function handleNoListen(){
+  noCount++;
+  sendEvent('listen_no_' + noCount);
+  const btn=document.getElementById('noListen');
+  const hint=document.getElementById('listenHint');
+  if(noCount===1){
+    btn.textContent='Pakka no? 🥺';
+    hint.textContent='Bas 30 seconds. Uske baad jo tum feel karo, wahi. ❤️';
+    btn.style.transform='translateX(8px) rotate(-1deg)';
+    toast.textContent='Ek baar aur soch lo… 🥺';
+  } else if(noCount===2){
+    btn.textContent='Last chance? 🌷';
+    hint.textContent='Promise, koi pressure nahi. Tum “no” keh sakti ho.';
+    btn.style.transform='translateX(-8px) rotate(1deg)';
+    toast.textContent='Okay okay… last little try. 😭';
+  } else {
+    toast.textContent='Okay. No pressure, seriously. ❤️';
+    hint.textContent='Thank you for being honest. Tum yahin close kar sakti ho.';
+    btn.textContent='No, really no';
+    btn.style.transform='none';
+    btn.onclick=()=>{
+      sendEvent('listen_no_final');
+      toast.textContent='Fair enough. 🌷';
+      toast.classList.add('show');
+      setTimeout(()=>toast.classList.remove('show'),1600);
+    };
+  }
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),1600);
+}
+function answerYes(){
+  show('s6');
+  celebrate();
+}
+function answerMaybe(){
+  show('s7');
+  gentleHearts(7);
+}
+function celebrateAgain(){ celebrate(); }
+function restart(){ noCount=0; show('s1'); }
+function gentleHearts(count){
+  const symbols=['♡','❤','💕','✦'];
+  for(let i=0;i<count;i++){
+    const e=document.createElement('div');
+    e.className='confetti';
+    e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+    e.style.left=(15+Math.random()*70)+'vw';
+    e.style.top=(68+Math.random()*15)+'vh';
+    e.style.setProperty('--dx',(Math.random()*120-60)+'px');
+    e.style.setProperty('--dy',(-180-Math.random()*320)+'px');
+    e.style.animationDelay=(Math.random()*.18)+'s';
+    document.body.appendChild(e);
+    setTimeout(()=>e.remove(),2200);
+  }
+}
+function celebrate(){
+  gentleHearts(30);
+  toast.textContent='Okay… this made me smile too. 🥹❤️';
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),1800);
+}
+
+// Create soft floating petals and sparkles — no external assets.
+(function createAtmosphere(){
+  const petals=document.getElementById('petals');
+  const sparkles=document.getElementById('sparkles');
+  const petalChars=['🌸','✿','❀','♡'];
+  for(let i=0;i<18;i++){
+    const e=document.createElement('div');
+    e.className='petal';
+    e.textContent=petalChars[Math.floor(Math.random()*petalChars.length)];
+    e.style.left=Math.random()*100+'vw';
+    e.style.setProperty('--x',(Math.random()*90-45)+'px');
+    e.style.animationDuration=(9+Math.random()*11)+'s';
+    e.style.animationDelay=(-Math.random()*15)+'s';
+    e.style.fontSize=(11+Math.random()*10)+'px';
+    petals.appendChild(e);
+  }
+  for(let i=0;i<14;i++){
+    const e=document.createElement('div');
+    e.className='spark';
+    e.textContent='✦';
+    e.style.left=Math.random()*100+'vw';
+    e.style.top=Math.random()*100+'vh';
+    e.style.animationDelay=(Math.random()*3)+'s';
+    sparkles.appendChild(e);
+  }
+})();
+
+// A playful but touch-friendly optional “No” behavior for the first question.
+// A real no is never blocked; tapping “No” simply shows a gentle retry message.
+window.addEventListener('load',()=>{ show('s1'); sendEvent('page_opened'); });
+</script>
+</body>
+</html>
