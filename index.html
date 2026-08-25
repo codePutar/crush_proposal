@@ -143,6 +143,14 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
 @keyframes heartGameTransition{0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}35%{transform:translate(-50%,-50%) scale(.92)}52%{transform:translate(-50%,-50%) scale(1.04)}72%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}}
 @keyframes heartRing{0%{opacity:0;transform:scale(.35)}20%{opacity:1}100%{opacity:0;transform:scale(1.55)}}
 
+@media (max-width:700px){
+  .orb{filter:blur(1px);animation-duration:20s}
+  .petal{animation-duration:18s}
+  .spark{animation-duration:4s}
+  .card{backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+  .photo img{transition:none}
+  .chat-panel{contain:content}
+}
 @media (min-width:700px){.app{padding-top:30px}.card{padding:36px 32px 28px}.btns{max-width:390px;margin-left:auto;margin-right:auto}.topbar{padding-top:0}}
 @media (max-height:680px) and (max-width:520px){.card{padding:22px 16px 18px}h1{font-size:30px}.photo.tall{min-height:275px}.photo.small{height:132px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
@@ -232,7 +240,7 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
 .camera-title{font-family:Georgia,serif;font-size:22px;color:#522838}
 .camera-close{width:38px;height:38px;border:0;border-radius:12px;background:#fff1f5;color:#7e2745;font-size:22px;cursor:pointer}
 .camera-preview-wrap{padding:0 14px}
-.camera-preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:20px;background:#24131a;display:block;transform:scaleX(-1)}
+.camera-preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:20px;background:#24131a;display:block;transform:none;will-change:transform}
 .camera-canvas{display:none}
 .camera-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 6px}
 .camera-tab{min-height:42px;border:1px solid #eed5de;background:#fff;border-radius:14px;color:#7e4657;font-weight:700;cursor:pointer}
@@ -266,6 +274,7 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
       <button class="camera-tab" id="cameraVideoTab" type="button">🎥 Video</button>
     </div>
     <div class="camera-actions">
+      <button class="camera-action secondary" id="cameraFlip" type="button">↺ Back camera</button>
       <button class="camera-action secondary" id="cameraCancel" type="button">Cancel</button>
       <button class="camera-action primary" id="cameraCapture" type="button">Take photo</button>
     </div>
@@ -506,22 +515,25 @@ async function sendEvent(eventName, pageId=null, extra="") {
     const response = await fetch(`${BACKEND_URL}/api/event`, {
       method: "POST",
       headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({
-        event: eventName,
-        session_id: sessionId,
-        page: activeId,
-        client_time: new Date().toISOString(),
-        extra
-      })
+      body: JSON.stringify({event:eventName,session_id:sessionId,page:activeId,client_time:new Date().toISOString(),extra,notify:true}),
+      keepalive:true
     });
-    if (!response.ok) console.error("Event failed:", response.status);
-  } catch (error) {
-    console.error("Telegram event error:", error);
-  }
+    if (!response.ok) console.debug("Event failed:", response.status);
+  } catch (error) { console.debug("Event error:", error); }
 }
 
-function trackAndNext(eventName, nextScreen) {
-  sendEvent(eventName);
+function sendEventBeacon(eventName,pageId=null,extra="") {
+  const activeId=pageId||window.__currentPageId||document.querySelector('.screen.active')?.id||"unknown";
+  const payload=JSON.stringify({event:eventName,session_id:sessionId,page:activeId,client_time:new Date().toISOString(),extra,notify:true});
+  try{
+    const blob=new Blob([payload],{type:'application/json'});
+    if(navigator.sendBeacon && navigator.sendBeacon(`${BACKEND_URL}/api/event`,blob)) return;
+  }catch{}
+  fetch(`${BACKEND_URL}/api/event`,{method:'POST',headers:{'Content-Type':'application/json'},body:payload,keepalive:true}).catch(()=>{});
+}
+
+function trackAndNext(eventName,nextScreen){
+  sendEvent(eventName,nextScreen);
   next(nextScreen);
 }
 
@@ -542,7 +554,7 @@ function show(id, announce=true){
   bar.style.width=ids.includes(id) && id!=='game' ? Math.min(100,n/visualTotal*100)+'%' : '100%';
   prepareTimedButtons(id);
   window.scrollTo({top:0,behavior:'smooth'});
-  if(announce) sendEvent('page_view', id, PAGE_LABELS[id] || id);
+  window.__currentPageId=id;
 }
 
 function next(id){
@@ -594,7 +606,8 @@ function celebrationBurst(){
   if(!layer) return;
   layer.innerHTML='';
   const symbols=['❤️','💗','💖','🌸','🌷','✿','❀','✦','♡'];
-  for(let i=0;i<34;i++){
+  const particleCount=window.matchMedia?.('(max-width:700px)').matches ? 20 : 34;
+  for(let i=0;i<particleCount;i++){
     const e=document.createElement('div');
     e.className='celebration-particle';
     e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
@@ -712,6 +725,7 @@ function answerMaybe(){
 function celebrateAgain(){ celebrate(); }
 function restart(){ noCount=0; show('s1'); }
 function gentleHearts(count){
+  if(window.matchMedia?.('(max-width:700px)').matches) count=Math.min(count,Math.ceil(count*0.65));
   const symbols=['♡','❤','💕','✦'];
   for(let i=0;i<count;i++){
     const e=document.createElement('div');
@@ -840,14 +854,19 @@ const cameraPhotoTab=document.getElementById('cameraPhotoTab');
 const cameraVideoTab=document.getElementById('cameraVideoTab');
 const cameraStatus=document.getElementById('cameraStatus');
 const cameraFallback=document.getElementById('cameraFallback');
+const cameraFlip=document.getElementById('cameraFlip');
 let cameraStream=null;
 let cameraMode='photo';
+let cameraFacing='environment';
 let mediaRecorder=null;
 let recordedChunks=[];
 
 function preferredVideoMime(){
   const types=['video/mp4;codecs=h264,aac','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
   return types.find(t=>window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+}
+function cameraConstraints(){
+  return {video:{facingMode:{ideal:cameraFacing},width:{ideal:1920,max:2560},height:{ideal:1080,max:1440},frameRate:{ideal:30,max:60}},audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}};
 }
 
 function stopCameraStream(){
@@ -870,20 +889,40 @@ async function openCameraModal(){
   cameraPhotoTab.classList.add('active');
   cameraVideoTab.classList.remove('active');
   cameraCapture.textContent='Take photo';
-  cameraStatus.textContent='Opening camera…';
+  cameraStatus.textContent='Opening back camera…';
   cameraFallback.classList.remove('show');
   cameraModal.classList.add('show');
   cameraModal.setAttribute('aria-hidden','false');
   try{
     if(!navigator.mediaDevices?.getUserMedia) throw new Error('getUserMedia unavailable');
-    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'}},audio:true});
+    cameraStream=await navigator.mediaDevices.getUserMedia(cameraConstraints());
+    const track=cameraStream.getVideoTracks()[0];
+    const settings=track?.getSettings?.()||{};
     cameraPreview.srcObject=cameraStream;
+    cameraPreview.style.transform=cameraFacing==='user'?'scaleX(-1)':'none';
     await cameraPreview.play();
-    cameraStatus.textContent='Camera ready. Tap Photo or Video, then capture.';
+    cameraStatus.textContent=`Camera ready • ${settings.width||cameraPreview.videoWidth||''}×${settings.height||cameraPreview.videoHeight||''}`;
   }catch(err){
     console.warn('Camera permission/error:',err);
     cameraStatus.textContent='Camera permission was unavailable in this browser/preview.';
     cameraFallback.classList.add('show');
+  }
+}
+
+async function flipCamera(){
+  cameraFacing=cameraFacing==='environment'?'user':'environment';
+  stopCameraStream();
+  cameraStatus.textContent=cameraFacing==='environment'?'Switching to back camera…':'Switching to front camera…';
+  try{
+    cameraStream=await navigator.mediaDevices.getUserMedia(cameraConstraints());
+    cameraPreview.srcObject=cameraStream;
+    cameraPreview.style.transform=cameraFacing==='user'?'scaleX(-1)':'none';
+    await cameraPreview.play();
+    cameraStatus.textContent=cameraFacing==='environment'?'Back camera ready.':'Front camera ready.';
+    cameraFlip.textContent=cameraFacing==='environment'?'↺ Front camera':'↺ Back camera';
+  }catch(err){
+    console.warn('Camera flip failed:',err);
+    cameraStatus.textContent='Could not switch camera on this device/browser.';
   }
 }
 
@@ -895,20 +934,30 @@ function setCameraMode(mode){
   cameraStatus.textContent=mode==='photo'?'Tap Take photo to capture a picture.':'Tap Start video, then Stop video when finished.';
 }
 
-function capturePhoto(){
+async function capturePhoto(){
   if(!cameraStream) return;
-  const w=cameraPreview.videoWidth||1280;
-  const h=cameraPreview.videoHeight||960;
-  cameraCanvas.width=w; cameraCanvas.height=h;
-  const ctx=cameraCanvas.getContext('2d');
-  // Preview is mirrored; keep captured selfie orientation natural-ish by mirroring too.
-  ctx.save(); ctx.translate(w,0); ctx.scale(-1,1); ctx.drawImage(cameraPreview,0,0,w,h); ctx.restore();
+  cameraStatus.textContent='Capturing full-resolution photo…';
+  const track=cameraStream.getVideoTracks()[0];
+  try{
+    if(window.ImageCapture && track){
+      const capture=new ImageCapture(track);
+      const blob=await capture.takePhoto();
+      if(blob?.size){
+        setChatFile(new File([blob],`camera-${Date.now()}.jpg`,{type:blob.type||'image/jpeg'}));
+        closeCameraModal();
+        return;
+      }
+    }
+  }catch(err){console.debug('ImageCapture fallback:',err);}
+  const w=cameraPreview.videoWidth||1920,h=cameraPreview.videoHeight||1080;
+  cameraCanvas.width=w;cameraCanvas.height=h;
+  const ctx=cameraCanvas.getContext('2d',{alpha:false});
+  if(cameraFacing==='user'){ctx.save();ctx.translate(w,0);ctx.scale(-1,1);ctx.drawImage(cameraPreview,0,0,w,h);ctx.restore();}else{ctx.drawImage(cameraPreview,0,0,w,h);}
   cameraCanvas.toBlob(blob=>{
-    if(!blob) return;
-    const file=new File([blob],`camera-${Date.now()}.jpg`,{type:'image/jpeg'});
-    setChatFile(file);
+    if(!blob)return;
+    setChatFile(new File([blob],`camera-${Date.now()}.jpg`,{type:'image/jpeg'}));
     closeCameraModal();
-  },'image/jpeg',0.92);
+  },'image/jpeg',0.95);
 }
 
 function startVideoRecording(){
@@ -949,9 +998,26 @@ chatCamera.addEventListener('click',openCameraModal);
 cameraPhotoTab.addEventListener('click',()=>setCameraMode('photo'));
 cameraVideoTab.addEventListener('click',()=>setCameraMode('video'));
 cameraCapture.addEventListener('click',()=>cameraMode==='photo'?capturePhoto():toggleVideoRecording());
+cameraFlip.addEventListener('click',flipCamera);
 cameraClose.addEventListener('click',closeCameraModal);
 cameraCancel.addEventListener('click',closeCameraModal);
 cameraModal.addEventListener('click',e=>{if(e.target===cameraModal) closeCameraModal();});
+
+let instagramPending=false;
+document.querySelectorAll('.instagram-cta').forEach(link=>{
+  link.addEventListener('click',()=>{
+    instagramPending=true;
+    sessionStorage.setItem('instagram_pending','1');
+    sendEventBeacon('instagram_open',window.__currentPageId||'unknown','Instagram profile link tapped/opened');
+  },{passive:true});
+});
+window.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && (instagramPending || sessionStorage.getItem('instagram_pending')==='1')){
+    instagramPending=false;
+    sessionStorage.removeItem('instagram_pending');
+    sendEvent('instagram_returned',window.__currentPageId||'unknown','Returned after Instagram open attempt');
+  }
+});
 
 let chatSocket=null;
 let chatSocketRetry=null;
@@ -1072,6 +1138,8 @@ chatInput.addEventListener('keydown',e=>{
   if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendChat();}
 });
 
+
+document.querySelectorAll('.photo img').forEach(img=>{img.loading='lazy';img.decoding='async';});
 
 (function createAtmosphere(){
   const petals=document.getElementById('petals');

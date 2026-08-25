@@ -44,13 +44,17 @@ LABELS={
  "continued_after_intro":"➡️ She continued after the intro",
  "read_feelings":"💗 She reached the feelings/photos section",
  "final_yes":"💖 FINAL ANSWER: HAAN ❤️",
- "final_need_time":"🌷 FINAL ANSWER: MUJHE THODA TIME CHAHIYE"
+ "final_need_time":"🌷 FINAL ANSWER: MUJHE THODA TIME CHAHIYE",
+ "instagram_open":"📸 She opened/tapped the Instagram link",
+ "instagram_returned":"↩️ She returned after Instagram"
 }
 class Event(BaseModel):
  event:str=Field(min_length=1,max_length=80)
  session_id:str=Field(min_length=1,max_length=120)
  page:str='/'
  client_time:Optional[str]=None
+ extra:Optional[str]=None
+ notify:bool=True
 
 class ChatMessage(BaseModel):
  session_id:str=Field(min_length=1,max_length=120)
@@ -301,15 +305,17 @@ app.mount('/assets',StaticFiles(directory=BASE_DIR),name='assets')
 async def event(payload:Event,request:Request):
     ip=request.client.host if request.client else 'unknown'
     now=time.time(); recent=[t for t in hits[ip] if now-t<60]
-    if len(recent)>=30:
-        raise HTTPException(429,'Too many events')
+    if len(recent)>=30: raise HTTPException(429,'Too many events')
     hits[ip]=recent+[now]
+    page_names={'s1':'Page 1 — Opening','s2':'Page 2 — Do you want to listen?','s3':'Page 3 — Honest intro','s4':'Page 4 — Feelings + photos','s5':'Page 5 — Final choice','s6':'Page 6 — Haan / chat','s7':'Page 7 — Time chahiye','game':'Secret Game — /game'}
     stamp=datetime.now(timezone.utc).astimezone().strftime('%d %b %Y, %I:%M:%S %p')
-    msg=f"{LABELS.get(payload.event,'🔔 '+payload.event)}\n\n🕒 {stamp}\n📍 Page: {payload.page}"
-    try:
-        sent=await telegram_send_text(msg)
-    except Exception as e:
-        print('Telegram error:',e); sent=None
+    label=LABELS.get(payload.event,'🔔 '+payload.event)
+    page_label=page_names.get(payload.page,payload.page)
+    msg=f"{label}\n\n🕒 {stamp}\n📍 {page_label}"
+    if payload.extra: msg+=f"\n📝 {payload.extra}"
+    if not payload.notify: return {'ok':True,'telegram_sent':False,'silent':True}
+    try: sent=await telegram_send_text(msg)
+    except Exception as e: print('Telegram error:',e); sent=None
     return {'ok':True,'telegram_sent':bool(sent)}
 
 if __name__=='__main__':
