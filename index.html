@@ -223,11 +223,57 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
 .chat-note strong{color:#7e2745}
 .game-hint{display:inline-block;margin-top:4px;color:#a28790;font-size:9px;letter-spacing:.02em;opacity:.85}
 
+
+/* In-page camera modal */
+.camera-modal{position:fixed;inset:0;z-index:90;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(49,18,32,.58);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.camera-modal.show{display:flex}
+.camera-sheet{width:min(100%,460px);background:rgba(255,255,255,.96);border:1px solid rgba(255,255,255,.9);border-radius:28px;box-shadow:0 28px 80px rgba(30,10,20,.28);overflow:hidden}
+.camera-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 12px}
+.camera-title{font-family:Georgia,serif;font-size:22px;color:#522838}
+.camera-close{width:38px;height:38px;border:0;border-radius:12px;background:#fff1f5;color:#7e2745;font-size:22px;cursor:pointer}
+.camera-preview-wrap{padding:0 14px}
+.camera-preview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:20px;background:#24131a;display:block;transform:scaleX(-1)}
+.camera-canvas{display:none}
+.camera-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 6px}
+.camera-tab{min-height:42px;border:1px solid #eed5de;background:#fff;border-radius:14px;color:#7e4657;font-weight:700;cursor:pointer}
+.camera-tab.active{background:linear-gradient(135deg,#b84566,#8d2b4c);color:#fff;border-color:transparent}
+.camera-actions{display:flex;gap:8px;padding:8px 14px 14px}
+.camera-action{flex:1;min-height:48px;border:0;border-radius:999px;font-weight:750;cursor:pointer}
+.camera-action.primary{background:linear-gradient(135deg,#b84566,#8d2b4c);color:#fff}
+.camera-action.secondary{background:#fff;border:1px solid #efd7df;color:#7e4657}
+.camera-status{font-size:10px;line-height:1.5;color:#9b7e87;text-align:center;padding:0 18px 14px}
+.camera-fallback{display:none;margin:0 14px 14px;padding:10px;border-radius:14px;background:#fff7f9;border:1px solid #f0d8df;color:#7e4657;font-size:11px;line-height:1.45;text-align:center}
+.camera-fallback.show{display:block}
+
 </style>
 </head>
 <body>
 <div id="bg"><div class="orb one"></div><div class="orb two"></div><div class="orb three"></div></div>
 <div class="petals" id="petals"></div><div class="sparkles" id="sparkles"></div><div id="yesNo"><div class="toast" id="toast"></div></div>
+
+<div class="camera-modal" id="cameraModal" aria-hidden="true">
+  <div class="camera-sheet" role="dialog" aria-modal="true" aria-label="Camera">
+    <div class="camera-head">
+      <div class="camera-title">Camera ✨</div>
+      <button class="camera-close" id="cameraClose" type="button" aria-label="Close camera">×</button>
+    </div>
+    <div class="camera-preview-wrap">
+      <video id="cameraPreview" class="camera-preview" autoplay playsinline muted></video>
+      <canvas id="cameraCanvas" class="camera-canvas"></canvas>
+    </div>
+    <div class="camera-tabs">
+      <button class="camera-tab active" id="cameraPhotoTab" type="button">📸 Photo</button>
+      <button class="camera-tab" id="cameraVideoTab" type="button">🎥 Video</button>
+    </div>
+    <div class="camera-actions">
+      <button class="camera-action secondary" id="cameraCancel" type="button">Cancel</button>
+      <button class="camera-action primary" id="cameraCapture" type="button">Take photo</button>
+    </div>
+    <div class="camera-status" id="cameraStatus">Allow camera permission and you can take a photo instantly.</div>
+    <div class="camera-fallback" id="cameraFallback">Live camera isn't available here. Use the device camera/file picker instead.</div>
+  </div>
+</div>
+
 <div class="celebration-layer" id="celebrationLayer"></div>
 
 <main class="app">
@@ -370,7 +416,7 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
                    autocomplete="off" />
             <button class="chat-send" id="chatSend" aria-label="Send message">➤</button>
           </div>
-          <input id="chatCameraInput" type="file" accept="image/*" capture="user" hidden />
+          <input id="chatCameraInput" type="file" accept="image/*" capture="environment" hidden />
           <input id="chatGalleryInput" type="file" accept="image/*,video/*" hidden />
           <div class="chat-note">Camera 📷 • photos/selfies • videos • text — jo chaaho bhej sakti ho. ❤️<br><span class="game-hint">/game · secret game</span></div>
         </div>
@@ -778,25 +824,188 @@ function clearChatFile(){
   chatGalleryInput.value='';
 }
 
-chatCamera.addEventListener('click',()=>chatCameraInput.click());
 chatGallery.addEventListener('click',()=>chatGalleryInput.click());
 chatCameraInput.addEventListener('change',e=>setChatFile(e.target.files[0]||null));
 chatGalleryInput.addEventListener('change',e=>setChatFile(e.target.files[0]||null));
 chatClearFile.addEventListener('click',clearChatFile);
+
+/* Real in-page camera: photo capture + video recording, with file-input fallback. */
+const cameraModal=document.getElementById('cameraModal');
+const cameraPreview=document.getElementById('cameraPreview');
+const cameraCanvas=document.getElementById('cameraCanvas');
+const cameraClose=document.getElementById('cameraClose');
+const cameraCancel=document.getElementById('cameraCancel');
+const cameraCapture=document.getElementById('cameraCapture');
+const cameraPhotoTab=document.getElementById('cameraPhotoTab');
+const cameraVideoTab=document.getElementById('cameraVideoTab');
+const cameraStatus=document.getElementById('cameraStatus');
+const cameraFallback=document.getElementById('cameraFallback');
+let cameraStream=null;
+let cameraMode='photo';
+let mediaRecorder=null;
+let recordedChunks=[];
+
+function preferredVideoMime(){
+  const types=['video/mp4;codecs=h264,aac','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'];
+  return types.find(t=>window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+}
+
+function stopCameraStream(){
+  if(cameraStream){cameraStream.getTracks().forEach(t=>t.stop());cameraStream=null;}
+  if(cameraPreview) cameraPreview.srcObject=null;
+  if(mediaRecorder && mediaRecorder.state!=='inactive'){
+    try{mediaRecorder.stop();}catch{}
+  }
+  mediaRecorder=null; recordedChunks=[];
+}
+
+function closeCameraModal(){
+  stopCameraStream();
+  cameraModal.classList.remove('show');
+  cameraModal.setAttribute('aria-hidden','true');
+}
+
+async function openCameraModal(){
+  cameraMode='photo';
+  cameraPhotoTab.classList.add('active');
+  cameraVideoTab.classList.remove('active');
+  cameraCapture.textContent='Take photo';
+  cameraStatus.textContent='Opening camera…';
+  cameraFallback.classList.remove('show');
+  cameraModal.classList.add('show');
+  cameraModal.setAttribute('aria-hidden','false');
+  try{
+    if(!navigator.mediaDevices?.getUserMedia) throw new Error('getUserMedia unavailable');
+    cameraStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'user'}},audio:true});
+    cameraPreview.srcObject=cameraStream;
+    await cameraPreview.play();
+    cameraStatus.textContent='Camera ready. Tap Photo or Video, then capture.';
+  }catch(err){
+    console.warn('Camera permission/error:',err);
+    cameraStatus.textContent='Camera permission was unavailable in this browser/preview.';
+    cameraFallback.classList.add('show');
+  }
+}
+
+function setCameraMode(mode){
+  cameraMode=mode;
+  cameraPhotoTab.classList.toggle('active',mode==='photo');
+  cameraVideoTab.classList.toggle('active',mode==='video');
+  cameraCapture.textContent=mode==='photo'?'Take photo': 'Start video';
+  cameraStatus.textContent=mode==='photo'?'Tap Take photo to capture a picture.':'Tap Start video, then Stop video when finished.';
+}
+
+function capturePhoto(){
+  if(!cameraStream) return;
+  const w=cameraPreview.videoWidth||1280;
+  const h=cameraPreview.videoHeight||960;
+  cameraCanvas.width=w; cameraCanvas.height=h;
+  const ctx=cameraCanvas.getContext('2d');
+  // Preview is mirrored; keep captured selfie orientation natural-ish by mirroring too.
+  ctx.save(); ctx.translate(w,0); ctx.scale(-1,1); ctx.drawImage(cameraPreview,0,0,w,h); ctx.restore();
+  cameraCanvas.toBlob(blob=>{
+    if(!blob) return;
+    const file=new File([blob],`camera-${Date.now()}.jpg`,{type:'image/jpeg'});
+    setChatFile(file);
+    closeCameraModal();
+  },'image/jpeg',0.92);
+}
+
+function startVideoRecording(){
+  if(!cameraStream || !window.MediaRecorder) return;
+  const mime=preferredVideoMime();
+  try{
+    mediaRecorder=new MediaRecorder(cameraStream,mime?{mimeType:mime}:undefined);
+  }catch{
+    mediaRecorder=new MediaRecorder(cameraStream);
+  }
+  recordedChunks=[];
+  mediaRecorder.ondataavailable=e=>{if(e.data?.size) recordedChunks.push(e.data);};
+  mediaRecorder.onstop=()=>{
+    const actualType=mediaRecorder?.mimeType || mime || 'video/webm';
+    const blob=new Blob(recordedChunks,{type:actualType});
+    if(blob.size){
+      const ext=actualType.includes('mp4')?'mp4':'webm';
+      setChatFile(new File([blob],`camera-${Date.now()}.${ext}`,{type:actualType}));
+    }
+    cameraStatus.textContent='Video ready to send. ✨';
+    setTimeout(closeCameraModal,250);
+  };
+  mediaRecorder.start(250);
+  cameraCapture.textContent='Stop video';
+  cameraStatus.textContent='Recording… tap Stop video when finished.';
+}
+
+function toggleVideoRecording(){
+  if(!cameraStream) return;
+  if(mediaRecorder && mediaRecorder.state==='recording'){
+    mediaRecorder.stop();
+  }else{
+    startVideoRecording();
+  }
+}
+
+chatCamera.addEventListener('click',openCameraModal);
+cameraPhotoTab.addEventListener('click',()=>setCameraMode('photo'));
+cameraVideoTab.addEventListener('click',()=>setCameraMode('video'));
+cameraCapture.addEventListener('click',()=>cameraMode==='photo'?capturePhoto():toggleVideoRecording());
+cameraClose.addEventListener('click',closeCameraModal);
+cameraCancel.addEventListener('click',closeCameraModal);
+cameraModal.addEventListener('click',e=>{if(e.target===cameraModal) closeCameraModal();});
+
+let chatSocket=null;
+let chatSocketRetry=null;
+
+function connectChatSocket(){
+  try{
+    const base=new URL(BACKEND_URL);
+    base.protocol=base.protocol==='https:'?'wss:':'ws:';
+    chatSocket=new WebSocket(`${base.origin}/ws/chat/${encodeURIComponent(sessionId)}`);
+    chatSocket.onopen=()=>{
+      chatSocketRetry=0;
+      try{chatSocket.send('ready');}catch{}
+      clearInterval(window.__chatWsPing);
+      window.__chatWsPing=setInterval(()=>{
+        if(chatSocket?.readyState===WebSocket.OPEN){try{chatSocket.send('ping');}catch{}}
+      },20000);
+    };
+    chatSocket.onmessage=e=>{
+      try{
+        const payload=JSON.parse(e.data);
+        if(payload.type==='ready' || payload.type==='pong') return;
+        renderChatMessageOnce(payload);
+      }catch(err){ console.debug('Chat websocket message:',err); }
+    };
+    chatSocket.onclose=()=>{
+      clearInterval(window.__chatWsPing);
+      if(chatSocketRetry!==null) return;
+      chatSocketRetry=setTimeout(()=>{chatSocketRetry=null;connectChatSocket();},3000);
+    };
+    chatSocket.onerror=()=>{try{chatSocket.close();}catch{}};
+  }catch(e){ console.debug('Chat websocket unavailable:',e); }
+}
+
+function renderChatMessageOnce(m){
+  if(!m) return;
+  const key=String(m.id||m.time||m.text);
+  if(chatSeen.has(key)) return;
+  chatSeen.add(key);
+  addChatMessage(m.text, m.sender==='visitor', formatChatTime(m.time), m.media_url||'', m.media_type||'');
+}
 
 async function loadChat(){
   try{
     const r=await fetch(`${BACKEND_URL}/api/chat/messages?session_id=${encodeURIComponent(sessionId)}`);
     if(!r.ok) return;
     const data=await r.json();
-    (data.messages||[]).forEach(m=>{
-      const key=String(m.id||m.time||m.text);
-      if(chatSeen.has(key)) return;
-      chatSeen.add(key);
-      addChatMessage(m.text, m.sender==='visitor', formatChatTime(m.time), m.media_url||'', m.media_type||'');
-    });
+    (data.messages||[]).forEach(renderChatMessageOnce);
   }catch(e){ console.debug('Chat poll:',e); }
 }
+
+connectChatSocket();
+loadChat();
+// REST is only a fallback; WebSocket is the primary realtime channel.
+window.__chatRestFallback=setInterval(loadChat,15000);
 
 async function sendChat(){
   if(chatBusy || !chatInput) return;
@@ -829,10 +1038,8 @@ async function sendChat(){
         body:form
       });
       if(!r.ok) throw new Error('media send failed');
-
-      addChatMessage(text,true,formatChatTime(new Date().toISOString()),
-                     file.type.startsWith('image/')||file.type.startsWith('video/') ? URL.createObjectURL(file) : '',
-                     file.type);
+      const result=await r.json();
+      if(result.message) renderChatMessageOnce(result.message);
       clearChatFile();
     }else{
       const r=await fetch(`${BACKEND_URL}/api/chat/send`,{
@@ -841,9 +1048,9 @@ async function sendChat(){
         body:JSON.stringify({session_id:sessionId,text})
       });
       if(!r.ok) throw new Error('send failed');
-      addChatMessage(text,true,formatChatTime(new Date().toISOString()));
+      const result=await r.json();
+      if(result.message) renderChatMessageOnce(result.message);
     }
-    chatSeen.add('local-'+Date.now());
     chatInput.value='';
   }catch(e){
     toast.textContent='Message/media send nahi hua. Thodi der baad try karna. 🌷';
@@ -864,8 +1071,6 @@ chatSend.addEventListener('click',sendChat);
 chatInput.addEventListener('keydown',e=>{
   if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendChat();}
 });
-setInterval(loadChat,3500);
-loadChat();
 
 
 (function createAtmosphere(){
