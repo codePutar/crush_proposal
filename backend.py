@@ -1,13 +1,13 @@
 import os, time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional
 import asyncio
 
 import httpx
 from dotenv import load_dotenv
-from fastapi import FastAPI, Request, HTTPException, UploadFile, File, Form, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, HTTPException, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
@@ -24,8 +24,6 @@ TELEGRAM_WEBHOOK_URL=os.getenv("TELEGRAM_WEBHOOK_URL","").strip()
 TELEGRAM_WEBHOOK_SECRET=os.getenv("TELEGRAM_WEBHOOK_SECRET","").strip()
 IST=ZoneInfo("Asia/Kolkata")
 app=FastAPI(title="Proposal Backend")
-UPLOAD_DIR=os.path.join(BASE_DIR,"uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 app.add_middleware(
     CORSMiddleware,
@@ -98,46 +96,6 @@ async def telegram_typing():
         print('Telegram typing error:',e)
         return False
 
-async def telegram_get_file(file_id):
-    if not BOT_TOKEN or not file_id:
-        return None
-    try:
-        async with httpx.AsyncClient(timeout=10) as c:
-            meta=await c.get(f"https://api.telegram.org/bot{BOT_TOKEN}/getFile",params={"file_id":file_id})
-            meta.raise_for_status()
-            file_path=(meta.json().get('result') or {}).get('file_path')
-            if not file_path:
-                return None
-            data=await c.get(f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}")
-            data.raise_for_status()
-            return file_path, data.content
-    except Exception as e:
-        print('Telegram media download error:',e)
-        return None
-
-async def telegram_send_media(path, content_type, caption):
-    if not (BOT_TOKEN and CHAT_ID):
-        return None
-
-    if content_type.startswith('image/'):
-        method='sendPhoto'; field='photo'
-    elif content_type.startswith('video/') and content_type.lower().split(';',1)[0] in ('video/mp4','video/mpeg4'):
-        method='sendVideo'; field='video'
-    else:
-        # Browser MediaRecorder commonly produces WebM. Send it as a document
-        # so the upload still reaches Telegram instead of failing.
-        method='sendDocument'; field='document'
-
-    url=f"https://api.telegram.org/bot{BOT_TOKEN}/{method}"
-    with open(path,'rb') as f:
-        files={field:(os.path.basename(path),f,content_type)}
-        data={'chat_id':CHAT_ID,'caption':caption}
-        async with httpx.AsyncClient(timeout=60) as c:
-            r=await c.post(url,data=data,files=files)
-            r.raise_for_status()
-            payload=r.json()
-            return payload.get('result')
-
 
 async def broadcast_chat(session_id, message):
     sockets=list(chat_sockets.get(session_id,set()))
@@ -202,62 +160,6 @@ async def chat_typing(payload: ChatMessage, request: Request):
         await telegram_typing()
     return {'ok':True}
 
-@app.post('/api/chat/send-media')
-async def chat_send_media(
-    request:Request,
-    session_id:str=Form(...),
-    text:str=Form(''),
-    file:UploadFile=File(...)
-):
-    global last_active_session
-    ip=request.client.host if request.client else 'unknown'
-    now=time.time(); recent=[t for t in hits[ip] if now-t<60]
-    if len(recent)>=20:
-        raise HTTPException(429,'Too many messages')
-    hits[ip]=recent+[now]
-    if not session_id or len(session_id)>120:
-        raise HTTPException(400,'Invalid session')
-
-    content_type=file.content_type or 'application/octet-stream'
-    if not content_type.startswith(('image/','video/')):
-        raise HTTPException(400,'Only images and videos are supported')
-    data=await file.read()
-    if len(data)>25*1024*1024:
-        raise HTTPException(413,'Media too large (max 25 MB)')
-    ext=os.path.splitext(file.filename or '')[1].lower() or '.bin'
-    safe_name=f"{session_id}-{time.time_ns()}{ext}"
-    safe_path=os.path.join(UPLOAD_DIR,safe_name)
-    with open(safe_path,'wb') as f:
-        f.write(data)
-
-    last_active_session=session_id
-    stamp=datetime.now(IST).strftime('%d %b %Y, %I:%M:%S %p')
-    caption='📎 Media from website'
-    if text:
-        caption += f"\n\n{text}"
-    caption += f"\n\n🕒 {stamp}"
-    try:
-        sent=await telegram_send_media(safe_path,content_type,caption)
-    except Exception as e:
-        print('Telegram media error:',e)
-        sent=None
-    if not sent:
-        try: os.remove(safe_path)
-        except OSError: pass
-        raise HTTPException(503,'Media chat is not connected')
-
-    telegram_message_sessions[str(sent.get('message_id'))]=session_id
-    msg={
-        'id':f"visitor-media-{time.time_ns()}",
-        'sender':'visitor',
-        'text':text,
-        'media_url':f"/assets/uploads/{safe_name}",
-        'media_type':content_type,
-        'time':datetime.now(IST).isoformat()
-    }
-    store_message(session_id,msg)
-    await broadcast_chat(session_id,msg)
-    return {'ok':True,'message':msg,'media_url':msg['media_url'],'media_type':content_type}
 
 @app.get('/api/chat/messages')
 async def chat_get(session_id:str):
@@ -347,46 +249,9 @@ async def process_telegram_update(update):
     text=(msg.get('text') or msg.get('caption') or '').strip()
     base_id=f"owner-{update.get('update_id', time.time_ns())}"
 
-    if msg.get('photo'):
-        photo=max(msg['photo'], key=lambda x:(x.get('width',0)*x.get('height',0)))
-        downloaded=await telegram_get_file(photo.get('file_id'))
-        if downloaded:
-            file_path,data=downloaded
-            ext=os.path.splitext(file_path)[1].lower() or '.jpg'
-            safe_name=f"{session_id}-owner-{update.get('update_id', time.time_ns())}{ext}"
-            safe_path=os.path.join(UPLOAD_DIR,safe_name)
-            with open(safe_path,'wb') as f: f.write(data)
-            owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'image/jpeg','time':stamp}
-        else:
-            owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
-    elif msg.get('video'):
-        video=msg['video']
-        downloaded=await telegram_get_file(video.get('file_id'))
-        if downloaded:
-            file_path,data=downloaded
-            ext=os.path.splitext(file_path)[1].lower() or '.mp4'
-            safe_name=f"{session_id}-owner-{update.get('update_id', time.time_ns())}{ext}"
-            safe_path=os.path.join(UPLOAD_DIR,safe_name)
-            with open(safe_path,'wb') as f: f.write(data)
-            owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'video/mp4','time':stamp}
-        else:
-            owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
-    elif msg.get('document') and (msg['document'].get('mime_type') or '').startswith(('image/','video/')):
-        doc=msg['document']
-        downloaded=await telegram_get_file(doc.get('file_id'))
-        if downloaded:
-            file_path,data=downloaded
-            ext=os.path.splitext(file_path)[1].lower() or '.bin'
-            safe_name=f"{session_id}-owner-{update.get('update_id', time.time_ns())}{ext}"
-            safe_path=os.path.join(UPLOAD_DIR,safe_name)
-            with open(safe_path,'wb') as f: f.write(data)
-            owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':doc.get('mime_type'),'time':stamp}
-        else:
-            owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
-    else:
-        if not text:
-            return
-        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+    if not text:
+        return
+    owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
 
     store_message(session_id,owner_msg)
     await broadcast_chat(session_id,owner_msg)
