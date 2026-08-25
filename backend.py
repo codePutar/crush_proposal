@@ -1,6 +1,7 @@
 import os, time
 from collections import defaultdict
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 from typing import Optional
 import asyncio
 
@@ -19,6 +20,9 @@ if not os.path.exists(HTML_FILE):
     HTML_FILE=os.path.join(BASE_DIR,"index.html")
 BOT_TOKEN=os.getenv("TELEGRAM_BOT_TOKEN","").strip()
 CHAT_ID=os.getenv("TELEGRAM_CHAT_ID","").strip()
+TELEGRAM_WEBHOOK_URL=os.getenv("TELEGRAM_WEBHOOK_URL","").strip()
+TELEGRAM_WEBHOOK_SECRET=os.getenv("TELEGRAM_WEBHOOK_SECRET","").strip()
+IST=ZoneInfo("Asia/Kolkata")
 app=FastAPI(title="Proposal Backend")
 UPLOAD_DIR=os.path.join(BASE_DIR,"uploads")
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -61,7 +65,6 @@ class ChatMessage(BaseModel):
  text:str=Field(min_length=1,max_length=800)
 
 
-telegram_offset=0
 chat_messages=defaultdict(list)
 chat_sockets=defaultdict(set)
 typing_last_sent={}
@@ -164,7 +167,7 @@ async def chat_send(payload:ChatMessage, request:Request):
     if not payload.session_id or len(payload.session_id)>120:
         raise HTTPException(400,'Invalid session')
     last_active_session=payload.session_id
-    stamp=datetime.now(timezone.utc).astimezone().strftime('%d %b %Y, %I:%M:%S %p')
+    stamp=datetime.now(IST).strftime('%d %b %Y, %I:%M:%S %p')
     telegram_text=(
         f"💬 New message from the website\n\n"
         f"{payload.text}\n\n"
@@ -182,7 +185,7 @@ async def chat_send(payload:ChatMessage, request:Request):
         'id':f"visitor-{time.time_ns()}",
         'sender':'visitor',
         'text':payload.text,
-        'time':datetime.now(timezone.utc).isoformat()
+        'time':datetime.now(IST).isoformat()
     }
     store_message(payload.session_id,msg)
     await broadcast_chat(payload.session_id,msg)
@@ -228,7 +231,7 @@ async def chat_send_media(
         f.write(data)
 
     last_active_session=session_id
-    stamp=datetime.now(timezone.utc).astimezone().strftime('%d %b %Y, %I:%M:%S %p')
+    stamp=datetime.now(IST).strftime('%d %b %Y, %I:%M:%S %p')
     caption='📎 Media from website'
     if text:
         caption += f"\n\n{text}"
@@ -250,7 +253,7 @@ async def chat_send_media(
         'text':text,
         'media_url':f"/assets/uploads/{safe_name}",
         'media_type':content_type,
-        'time':datetime.now(timezone.utc).isoformat()
+        'time':datetime.now(IST).isoformat()
     }
     store_message(session_id,msg)
     await broadcast_chat(session_id,msg)
@@ -281,97 +284,134 @@ async def chat_websocket(websocket:WebSocket, session_id:str):
     finally:
         chat_sockets[session_id].discard(websocket)
 
-async def telegram_poll():
-    global telegram_offset, last_active_session
+async def telegram_set_webhook():
     if not BOT_TOKEN:
+        return False
+    webhook_url=TELEGRAM_WEBHOOK_URL
+    if not webhook_url:
+        base=os.getenv('RENDER_EXTERNAL_URL','').strip().rstrip('/')
+        if base:
+            webhook_url=f"{base}/telegram/webhook"
+    if not webhook_url:
+        print('Telegram webhook skipped: set TELEGRAM_WEBHOOK_URL or RENDER_EXTERNAL_URL')
+        return False
+    url=f"https://api.telegram.org/bot{BOT_TOKEN}/setWebhook"
+    data={
+        'url':webhook_url,
+        'allowed_updates':['message'],
+        'drop_pending_updates':False,
+    }
+    if TELEGRAM_WEBHOOK_SECRET:
+        data['secret_token']=TELEGRAM_WEBHOOK_SECRET
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            r=await c.post(url,json=data)
+            r.raise_for_status()
+            print('Telegram webhook configured:', webhook_url)
+            return True
+    except Exception as e:
+        print('Telegram webhook setup error:',e)
+        return False
+
+async def telegram_delete_webhook(drop_pending=False):
+    if not BOT_TOKEN:
+        return False
+    url=f"https://api.telegram.org/bot{BOT_TOKEN}/deleteWebhook"
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            r=await c.post(url,json={'drop_pending_updates':drop_pending})
+            r.raise_for_status()
+        return True
+    except Exception as e:
+        print('Telegram delete webhook error:',e)
+        return False
+
+async def process_telegram_update(update):
+    global last_active_session
+    msg=update.get('message') or update.get('edited_message')
+    if not msg:
         return
-    url=f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
-    while True:
-        try:
-            async with httpx.AsyncClient(timeout=8) as c:
-                r=await c.get(url,params={'timeout':1,'offset':telegram_offset+1,'allowed_updates':['message']})
-                r.raise_for_status()
-                data=r.json()
-            results=data.get('result',[])
-            for update in results:
-                telegram_offset=max(telegram_offset,int(update['update_id']))
-                msg=update.get('message') or update.get('edited_message')
-                if not msg:
-                    continue
-                from_id=str((msg.get('chat') or {}).get('id',''))
-                if CHAT_ID and from_id!=CHAT_ID:
-                    continue
+    from_id=str((msg.get('chat') or {}).get('id',''))
+    if CHAT_ID and from_id!=CHAT_ID:
+        return
 
-                reply_to=(msg.get('reply_to_message') or {}).get('message_id')
-                session_id=telegram_message_sessions.get(str(reply_to)) if reply_to else None
-                if not session_id:
-                    session_id=last_active_session
-                if not session_id:
-                    continue
-                last_active_session=session_id
+    reply_to=(msg.get('reply_to_message') or {}).get('message_id')
+    session_id=telegram_message_sessions.get(str(reply_to)) if reply_to else None
+    if not session_id:
+        session_id=last_active_session
+    if not session_id:
+        return
+    last_active_session=session_id
 
-                stamp=datetime.now(timezone.utc).isoformat()
-                text=(msg.get('text') or msg.get('caption') or '').strip()
-                base_id=f"owner-{update['update_id']}"
+    stamp=datetime.now(IST).isoformat()
+    text=(msg.get('text') or msg.get('caption') or '').strip()
+    base_id=f"owner-{update.get('update_id', time.time_ns())}"
 
-                # Telegram photo: download highest-resolution version and expose it to the web chat.
-                if msg.get('photo'):
-                    photo=max(msg['photo'], key=lambda x:(x.get('width',0)*x.get('height',0)))
-                    downloaded=await telegram_get_file(photo.get('file_id'))
-                    if downloaded:
-                        file_path,data=downloaded
-                        ext=os.path.splitext(file_path)[1].lower() or '.jpg'
-                        safe_name=f"{session_id}-owner-{update['update_id']}{ext}"
-                        safe_path=os.path.join(UPLOAD_DIR,safe_name)
-                        with open(safe_path,'wb') as f: f.write(data)
-                        owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'image/jpeg','time':stamp}
-                    else:
-                        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+    if msg.get('photo'):
+        photo=max(msg['photo'], key=lambda x:(x.get('width',0)*x.get('height',0)))
+        downloaded=await telegram_get_file(photo.get('file_id'))
+        if downloaded:
+            file_path,data=downloaded
+            ext=os.path.splitext(file_path)[1].lower() or '.jpg'
+            safe_name=f"{session_id}-owner-{update.get('update_id', time.time_ns())}{ext}"
+            safe_path=os.path.join(UPLOAD_DIR,safe_name)
+            with open(safe_path,'wb') as f: f.write(data)
+            owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'image/jpeg','time':stamp}
+        else:
+            owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+    elif msg.get('video'):
+        video=msg['video']
+        downloaded=await telegram_get_file(video.get('file_id'))
+        if downloaded:
+            file_path,data=downloaded
+            ext=os.path.splitext(file_path)[1].lower() or '.mp4'
+            safe_name=f"{session_id}-owner-{update.get('update_id', time.time_ns())}{ext}"
+            safe_path=os.path.join(UPLOAD_DIR,safe_name)
+            with open(safe_path,'wb') as f: f.write(data)
+            owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'video/mp4','time':stamp}
+        else:
+            owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+    elif msg.get('document') and (msg['document'].get('mime_type') or '').startswith(('image/','video/')):
+        doc=msg['document']
+        downloaded=await telegram_get_file(doc.get('file_id'))
+        if downloaded:
+            file_path,data=downloaded
+            ext=os.path.splitext(file_path)[1].lower() or '.bin'
+            safe_name=f"{session_id}-owner-{update.get('update_id', time.time_ns())}{ext}"
+            safe_path=os.path.join(UPLOAD_DIR,safe_name)
+            with open(safe_path,'wb') as f: f.write(data)
+            owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':doc.get('mime_type'),'time':stamp}
+        else:
+            owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+    else:
+        if not text:
+            return
+        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
 
-                elif msg.get('video'):
-                    video=msg['video']
-                    downloaded=await telegram_get_file(video.get('file_id'))
-                    if downloaded:
-                        file_path,data=downloaded
-                        ext=os.path.splitext(file_path)[1].lower() or '.mp4'
-                        safe_name=f"{session_id}-owner-{update['update_id']}{ext}"
-                        safe_path=os.path.join(UPLOAD_DIR,safe_name)
-                        with open(safe_path,'wb') as f: f.write(data)
-                        owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'video/mp4','time':stamp}
-                    else:
-                        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+    store_message(session_id,owner_msg)
+    await broadcast_chat(session_id,owner_msg)
 
-                elif msg.get('document') and (msg['document'].get('mime_type') or '').startswith(('image/','video/')):
-                    doc=msg['document']
-                    downloaded=await telegram_get_file(doc.get('file_id'))
-                    if downloaded:
-                        file_path,data=downloaded
-                        ext=os.path.splitext(file_path)[1].lower() or '.bin'
-                        safe_name=f"{session_id}-owner-{update['update_id']}{ext}"
-                        safe_path=os.path.join(UPLOAD_DIR,safe_name)
-                        with open(safe_path,'wb') as f: f.write(data)
-                        owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':doc.get('mime_type'),'time':stamp}
-                    else:
-                        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
-                else:
-                    if not text:
-                        continue
-                    owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
-
-                store_message(session_id,owner_msg)
-                await broadcast_chat(session_id,owner_msg)
-        except Exception as e:
-            print('Telegram polling error:',e)
-            await asyncio.sleep(0.5)
+@app.post('/telegram/webhook')
+async def telegram_webhook(request:Request):
+    if TELEGRAM_WEBHOOK_SECRET:
+        received=request.headers.get('X-Telegram-Bot-Api-Secret-Token','')
+        if received != TELEGRAM_WEBHOOK_SECRET:
+            raise HTTPException(403,'Invalid webhook secret')
+    try:
+        update=await request.json()
+    except Exception:
+        raise HTTPException(400,'Invalid JSON')
+    asyncio.create_task(process_telegram_update(update))
+    return {'ok':True}
 
 @app.on_event('startup')
 async def startup_chat_poll():
     if BOT_TOKEN and CHAT_ID:
-        asyncio.create_task(telegram_poll())
+        await telegram_set_webhook()
 
 @app.get('/api/health')
 async def health():
-    return {'ok':True,'telegram':bool(BOT_TOKEN and CHAT_ID),'websocket':True}
+    return {'ok':True,'telegram':bool(BOT_TOKEN and CHAT_ID),'websocket':True,'telegram_webhook':True,'timezone':'Asia/Kolkata'}
 
 @app.get('/')
 async def root():
@@ -386,7 +426,7 @@ async def event(payload:Event,request:Request):
     if len(recent)>=30: raise HTTPException(429,'Too many events')
     hits[ip]=recent+[now]
     page_names={'s1':'Page 1 — Opening','s2':'Page 2 — Do you want to listen?','s3':'Page 3 — Honest intro','s4':'Page 4 — Feelings + photos','s5':'Page 5 — Final choice','s6':'Page 6 — Haan / chat','s7':'Page 7 — Time chahiye','game':'Secret Game — /game'}
-    stamp=datetime.now(timezone.utc).astimezone().strftime('%d %b %Y, %I:%M:%S %p')
+    stamp=datetime.now(IST).strftime('%d %b %Y, %I:%M:%S %p')
     label=LABELS.get(payload.event,'🎮 '+payload.event) if payload.event.startswith('game_') else LABELS.get(payload.event,'🔔 '+payload.event)
     page_label=page_names.get(payload.page,payload.page)
     msg=f"{label}\n\n🕒 {stamp}\n📍 {page_label}"
