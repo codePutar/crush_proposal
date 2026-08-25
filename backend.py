@@ -137,8 +137,7 @@ async def chat_send(payload:ChatMessage, request:Request):
     telegram_text=(
         f"💬 New message from the website\n\n"
         f"{payload.text}\n\n"
-        f"🕒 {stamp}\n"
-        f"🆔 Session: {payload.session_id}"
+        f"🕒 {stamp}"
     )
     try:
         sent=await telegram_send_text(telegram_text)
@@ -191,7 +190,7 @@ async def chat_send_media(
     caption='📎 Media from website'
     if text:
         caption += f"\n\n{text}"
-    caption += f"\n\n🕒 {stamp}\n🆔 Session: {session_id}"
+    caption += f"\n\n🕒 {stamp}"
     try:
         sent=await telegram_send_media(safe_path,content_type,caption)
     except Exception as e:
@@ -309,10 +308,12 @@ async def event(payload:Event,request:Request):
     hits[ip]=recent+[now]
     page_names={'s1':'Page 1 — Opening','s2':'Page 2 — Do you want to listen?','s3':'Page 3 — Honest intro','s4':'Page 4 — Feelings + photos','s5':'Page 5 — Final choice','s6':'Page 6 — Haan / chat','s7':'Page 7 — Time chahiye','game':'Secret Game — /game'}
     stamp=datetime.now(timezone.utc).astimezone().strftime('%d %b %Y, %I:%M:%S %p')
-    label=LABELS.get(payload.event,'🔔 '+payload.event)
+    label=LABELS.get(payload.event,'🎮 '+payload.event) if payload.event.startswith('game_') else LABELS.get(payload.event,'🔔 '+payload.event)
     page_label=page_names.get(payload.page,payload.page)
     msg=f"{label}\n\n🕒 {stamp}\n📍 {page_label}"
-    if payload.extra: msg+=f"\n📝 {payload.extra}"
+    if payload.extra:
+        prefix='🎮 Game choice' if payload.event=='game_choice' else '📝'
+        msg+=f"\n{prefix}: {payload.extra}"
     if not payload.notify: return {'ok':True,'telegram_sent':False,'silent':True}
     try: sent=await telegram_send_text(msg)
     except Exception as e: print('Telegram error:',e); sent=None

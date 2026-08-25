@@ -646,8 +646,11 @@ function renderGameRound(){
 }
 
 function chooseGame(choice){
+  const roundIndex=gameRound;
+  const round=gameRounds[roundIndex];
+  const answer=choice==='A' ? round.a : round.b;
   gameScore += choice==='A' ? 1 : 0;
-  sendEvent('game_choice','game',`round=${gameRound+1}, choice=${choice}`);
+  sendEvent('game_choice','game',`Round ${roundIndex+1}/3\nQuestion: ${round.q}\nSelected answer: ${answer}`);
   if(gameRound < gameRounds.length-1){
     gameRound++;
     renderGameRound();
@@ -1056,7 +1059,11 @@ function renderChatMessageOnce(m){
   const key=String(m.id||m.time||m.text);
   if(chatSeen.has(key)) return;
   chatSeen.add(key);
-  addChatMessage(m.text, m.sender==='visitor', formatChatTime(m.time), m.media_url||'', m.media_type||'');
+  let mediaUrl=m.media_url||'';
+  if(mediaUrl && !/^https?:\/\//i.test(mediaUrl) && !mediaUrl.startsWith('blob:') && !mediaUrl.startsWith('data:')){
+    mediaUrl=`${BACKEND_URL.replace(/\/$/,'')}${mediaUrl.startsWith('/')?'':'/'}${mediaUrl}`;
+  }
+  addChatMessage(m.text, m.sender==='visitor', formatChatTime(m.time), mediaUrl, m.media_type||'');
 }
 
 async function loadChat(){
