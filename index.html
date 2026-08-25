@@ -1451,6 +1451,240 @@
       letter-spacing: .02em;
       opacity: .85
     }
+
+
+
+    .chat-game-btn {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid #ead1d9;
+      border-radius: 14px;
+      background: linear-gradient(180deg, #fff, #fff7f9);
+      color: #7e4657;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 8px;
+      padding: 10px 14px;
+      transition: transform .18s, box-shadow .18s, background .18s
+    }
+
+    .chat-game-btn:hover {
+      background: #fff2f6;
+      box-shadow: 0 7px 16px rgba(93, 42, 59, .08)
+    }
+
+    .chat-game-btn:active {
+      transform: scale(.98)
+    }
+
+    /* Game interaction polish */
+    .game-question {
+      font-family: Georgia, serif;
+      font-size: 25px;
+      line-height: 1.3;
+      color: #522838;
+      margin: 4px auto 4px;
+      min-height: 34px;
+      transition: opacity .25s, transform .25s
+    }
+
+    .game-question.swap {
+      animation: questionSwap .42s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    @keyframes questionSwap {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(.98)
+      }
+
+      100% {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .game-choice .btn.choice-hit {
+      animation: choiceHit .48s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    @keyframes choiceHit {
+      0% {
+        transform: scale(1)
+      }
+
+      35% {
+        transform: scale(1.07) rotate(-1deg)
+      }
+
+      65% {
+        transform: scale(.98) rotate(1deg)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .game-choice .btn.choice-dim {
+      opacity: .38;
+      transform: scale(.97);
+      filter: saturate(.7)
+    }
+
+    .game-choice .btn {
+      transition: transform .22s, opacity .22s, filter .22s, box-shadow .22s
+    }
+
+    .game-finish {
+      position: fixed;
+      inset: 0;
+      z-index: 95;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden
+    }
+
+    .game-finish-core {
+      font-size: clamp(50px, 16vw, 96px);
+      opacity: 0;
+      animation: finishCore 1.25s cubic-bezier(.2, .85, .25, 1) forwards
+    }
+
+    @keyframes finishCore {
+      0% {
+        opacity: 0;
+        transform: scale(.3)
+      }
+
+      18% {
+        opacity: 1;
+        transform: scale(1.12)
+      }
+
+      42% {
+        transform: scale(.94)
+      }
+
+      65% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.7) translateY(-15px)
+      }
+    }
+
+    .game-spark {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      font-size: 20px;
+      opacity: 0;
+      animation: finishSpark 1.4s cubic-bezier(.18, .7, .25, 1) forwards
+    }
+
+    @keyframes finishSpark {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.5)
+      }
+
+      12% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(1.05)
+      }
+    }
+
+    .chat-return-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 110;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 249, 250, .0);
+      opacity: 0
+    }
+
+    .chat-return-overlay.show {
+      animation: chatReturn .85s ease forwards
+    }
+
+    .chat-return-heart {
+      font-size: clamp(48px, 15vw, 82px);
+      transform: scale(.65);
+      opacity: 0
+    }
+
+    .chat-return-overlay.show .chat-return-heart {
+      animation: returnHeart .85s cubic-bezier(.2, .85, .25, 1) forwards
+    }
+
+    @keyframes chatReturn {
+      0% {
+        opacity: 0;
+        background: rgba(255, 249, 250, 0)
+      }
+
+      35% {
+        opacity: 1;
+        background: rgba(255, 249, 250, .82)
+      }
+
+      100% {
+        opacity: 0;
+        background: rgba(255, 249, 250, 0)
+      }
+    }
+
+    @keyframes returnHeart {
+      0% {
+        opacity: 0;
+        transform: scale(.6)
+      }
+
+      25% {
+        opacity: 1;
+        transform: scale(1.1)
+      }
+
+      65% {
+        opacity: 1;
+        transform: scale(1)
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1.45)
+      }
+    }
+
+    .chat-return-enter {
+      animation: chatReturnEnter .65s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    @keyframes chatReturnEnter {
+      0% {
+        opacity: 0;
+        transform: translateY(18px) scale(.985)
+      }
+
+      100% {
+        opacity: 1;
+        transform: none
+      }
+    }
   </style>
 </head>
 
@@ -1631,14 +1865,10 @@
                 autocomplete="off" />
               <button class="chat-custom-cancel" id="chatCustomCancel" type="button">Cancel</button>
             </div>
-            <div class="chat-compose">
-              <input id="chatInput" class="chat-input" maxlength="800" placeholder="Message…"
-                title="Type /game to open the secret game" aria-label="Message" autocomplete="off" />
-              <button class="chat-send" id="chatSend" type="button" aria-label="Send message">➤</button>
-            </div>
+            <button class="chat-game-btn" id="chatGameBtn" type="button">🎮 Play a little game</button>
             <div class="chat-sent-status" id="chatSentStatus"></div>
             <div class="chat-note">Quick reply tap karo ya Custom se apni baat likho. ❤️<br><span
-                class="game-hint">/game · secret game</span></div>
+                class="game-hint">Custom se apna message likho ❤️</span></div>
           </div>
           <a class="instagram-cta" href="https://instagram.com/_ashutosh_archer" target="_blank"
             rel="noopener noreferrer" aria-label="Follow Ashutosh on Instagram">
@@ -1662,6 +1892,7 @@
           <h1 style="font-size:34px">Pick one…<span class="soft">let's see what you choose 👀</span></h1>
           <p class="lead">Koi timer nahi, koi pressure nahi. Bas ek cute little game. ❤️</p>
           <div class="game-status" id="gameStatus">Question 1 • 3 rounds</div>
+          <div class="game-question" id="gameQuestion">Perfect plan?</div>
           <div class="game-result" id="gameResult">Ready? Choose your answer below. 🌷</div>
           <div class="game-choice" id="gameChoices">
             <button class="btn primary" data-choice="A">Coffee date ☕</button>
@@ -1822,43 +2053,116 @@
 
     /* Secret game — only launched by typing /game in chat. No timer. */
     const gameRounds = [
-      { q: "Round 1 • perfect plan?", a: "Coffee date ☕", b: "Long walk 🌆" },
-      { q: "Round 2 • cutest vibe?", a: "Random jokes 😂", b: "Deep talks 🌙" },
-      { q: "Round 3 • one little yes?", a: "Maybe 👀", b: "Definitely ❤️" }
+      { q: "Perfect plan?", a: "Coffee date ☕", b: "Long walk 🌆", aEmoji: "☕", bEmoji: "🌆" },
+      { q: "Cutest vibe?", a: "Random jokes 😂", b: "Deep talks 🌙", aEmoji: "😂", bEmoji: "🌙" },
+      { q: "One little yes?", a: "Maybe 👀", b: "Definitely ❤️", aEmoji: "👀", bEmoji: "❤️" }
     ];
     let gameRound = 0;
     let gameScore = 0;
+    let gameLocked = false;
 
     function startGame() {
-      gameRound = 0; gameScore = 0;
+      gameRound = 0; gameScore = 0; gameLocked = false;
       show('game');
-      renderGameRound();
-      sendEvent('game_started', 'game', 'Opened with /game from chat');
+      renderGameRound(true);
+      sendEvent('game_started', 'game', 'Opened from the chat game button');
     }
 
-    function renderGameRound() {
+    function renderGameRound(first = false) {
       const round = gameRounds[gameRound];
-      document.getElementById('gameStatus').textContent = `${round.q} • ${gameRound + 1}/3`;
-      document.querySelector('[data-choice="A"]').textContent = round.a;
-      document.querySelector('[data-choice="B"]').textContent = round.b;
-      document.getElementById('gameResult').textContent = 'Choose one — no right or wrong answer. 🌷';
+      const status = document.getElementById('gameStatus');
+      const question = document.getElementById('gameQuestion');
+      const result = document.getElementById('gameResult');
+      const a = document.querySelector('[data-choice="A"]');
+      const b = document.querySelector('[data-choice="B"]');
+      status.textContent = `Question ${gameRound + 1} • ${gameRounds.length} rounds`;
+      if (question) {
+        question.classList.remove('swap');
+        question.textContent = round.q;
+        if (!first) { void question.offsetWidth; question.classList.add('swap'); }
+      }
+      a.textContent = round.a;
+      b.textContent = round.b;
+      a.disabled = false; b.disabled = false;
+      a.classList.remove('choice-hit', 'choice-dim');
+      b.classList.remove('choice-hit', 'choice-dim');
+      result.textContent = 'Choose one — no right or wrong answer. 🌷';
+    }
+
+    function gameFinishAnimation(emoji) {
+      const wrap = document.createElement('div');
+      wrap.className = 'game-finish';
+      const core = document.createElement('div');
+      core.className = 'game-finish-core';
+      core.textContent = emoji;
+      wrap.appendChild(core);
+      ['✨', '🌸', '💗', '✦', '🌷', '♡', '💖', '❀'].forEach((symbol, i) => {
+        const e = document.createElement('div');
+        e.className = 'game-spark';
+        e.textContent = symbol;
+        e.style.setProperty('--dx', `${Math.cos(i / 8 * Math.PI * 2) * 150}px`);
+        e.style.setProperty('--dy', `${Math.sin(i / 8 * Math.PI * 2) * 180}px`);
+        e.style.setProperty('--rot', `${i * 45 - 180}deg`);
+        e.style.animationDelay = `${i * 0.025}s`;
+        wrap.appendChild(e);
+      });
+      document.body.appendChild(wrap);
+      setTimeout(() => wrap.remove(), 1500);
+    }
+
+    function returnToChatFromGame() {
+      const overlay = document.createElement('div');
+      overlay.className = 'chat-return-overlay';
+      overlay.innerHTML = '<div class="chat-return-heart">💬❤️</div>';
+      document.body.appendChild(overlay);
+      void overlay.offsetWidth;
+      overlay.classList.add('show');
+      setTimeout(() => {
+        show('s6');
+        const chatPanel = document.querySelector('#s6 .chat-panel');
+        if (chatPanel) {
+          chatPanel.classList.remove('chat-return-enter');
+          void chatPanel.offsetWidth;
+          chatPanel.classList.add('chat-return-enter');
+          setTimeout(() => chatPanel.classList.remove('chat-return-enter'), 700);
+        }
+      }, 420);
+      setTimeout(() => overlay.remove(), 950);
     }
 
     function chooseGame(choice) {
+      if (gameLocked) return;
+      gameLocked = true;
+
       const roundIndex = gameRound;
       const round = gameRounds[roundIndex];
       const answer = choice === 'A' ? round.a : round.b;
+      const picked = document.querySelector(`[data-choice="${choice}"]`);
+      const other = document.querySelector(`[data-choice="${choice === 'A' ? 'B' : 'A'}"]`);
+      const emoji = choice === 'A' ? round.aEmoji : round.bEmoji;
+
+      picked.classList.add('choice-hit');
+      other.classList.add('choice-dim');
       gameScore += choice === 'A' ? 1 : 0;
-      sendEvent('game_choice', 'game', `Round ${roundIndex + 1}/3\nQuestion: ${round.q}\nSelected answer: ${answer}`);
+      sendEvent('game_choice', 'game', `Question ${roundIndex + 1}/${gameRounds.length}: ${round.q}
+Selected answer: ${answer}`);
+
       if (gameRound < gameRounds.length - 1) {
-        gameRound++;
-        renderGameRound();
+        document.getElementById('gameResult').textContent =
+          choice === 'A' ? `${emoji} Nice choice! Next one…` : `${emoji} Okayyy… next one 👀`;
+        setTimeout(() => {
+          gameRound++;
+          gameLocked = false;
+          renderGameRound();
+        }, 520);
       } else {
         document.getElementById('gameStatus').textContent = 'Game complete ✨';
         document.getElementById('gameResult').textContent =
           gameScore >= 2 ? 'Okayyy… I knew you had good taste. 🥹❤️' :
             'Cute choices. I’m counting that as a win anyway. 🌷';
         document.querySelectorAll('#gameChoices .btn').forEach(b => b.disabled = true);
+        gameFinishAnimation(gameScore >= 2 ? '🥹❤️' : '🌷✨');
+        setTimeout(() => returnToChatFromGame(), 950);
       }
     }
 
@@ -1867,9 +2171,8 @@
     });
 
     function exitGame() {
-      sendEvent('game_exit', 'game', 'Returned to first screen');
-      show('s1');
-      chatInput?.focus();
+      sendEvent('game_exit', 'game', 'Returned to chat');
+      returnToChatFromGame();
     }
 
     const hints = [
@@ -1967,6 +2270,8 @@
     /* Instagram-style text chat */
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
+    const chatGameBtn = document.getElementById('chatGameBtn');
+    chatGameBtn?.addEventListener('click', () => { chatGameBtn.classList.add('game-opening'); setTimeout(() => chatGameBtn.classList.remove('game-opening'), 550); startGame(); });
     const chatSend = document.getElementById('chatSend');
     const chatEmpty = document.getElementById('chatEmpty');
     const chatTyping = document.getElementById('chatTyping');
