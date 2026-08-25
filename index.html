@@ -1080,6 +1080,27 @@ loadChat();
 // REST is only a fallback; WebSocket is the primary realtime channel.
 window.__chatRestFallback=setInterval(loadChat,15000);
 
+let typingLastSent=0;
+let typingTimer=null;
+async function sendTypingIndicator(){
+  const now=Date.now();
+  if(now-typingLastSent<2500) return;
+  typingLastSent=now;
+  try{
+    await fetch(`${BACKEND_URL}/api/chat/typing`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({session_id:sessionId,text:'typing'})
+    });
+  }catch{}
+}
+function handleChatTyping(){
+  if(chatInput.value.trim()) sendTypingIndicator();
+  clearTimeout(typingTimer);
+  typingTimer=setTimeout(()=>{},300);
+}
+chatInput.addEventListener('input',handleChatTyping);
+
 async function sendChat(){
   if(chatBusy || !chatInput) return;
   const text=chatInput.value.trim();
@@ -1095,7 +1116,6 @@ async function sendChat(){
 
   chatBusy=true;
   chatSend.disabled=true;
-  chatInput.disabled=true;
   chatCamera.disabled=true;
   chatGallery.disabled=true;
 
@@ -1132,11 +1152,9 @@ async function sendChat(){
   }finally{
     chatBusy=false;
     chatSend.disabled=false;
-    chatInput.disabled=false;
     chatCamera.disabled=false;
     chatGallery.disabled=false;
     chatTyping.classList.remove('show');
-    chatInput.focus();
   }
 }
 

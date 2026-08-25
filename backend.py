@@ -64,6 +64,7 @@ class ChatMessage(BaseModel):
 telegram_offset=0
 chat_messages=defaultdict(list)
 chat_sockets=defaultdict(set)
+typing_last_sent={}
 telegram_message_sessions={}
 last_active_session=None
 
@@ -80,6 +81,36 @@ async def telegram_send_text(text):
         r.raise_for_status()
         payload=r.json()
         return payload.get("result")
+
+async def telegram_typing():
+    if not (BOT_TOKEN and CHAT_ID):
+        return False
+    url=f"https://api.telegram.org/bot{BOT_TOKEN}/sendChatAction"
+    try:
+        async with httpx.AsyncClient(timeout=5) as c:
+            r=await c.post(url,json={"chat_id":CHAT_ID,"action":"typing"})
+            r.raise_for_status()
+        return True
+    except Exception as e:
+        print('Telegram typing error:',e)
+        return False
+
+async def telegram_get_file(file_id):
+    if not BOT_TOKEN or not file_id:
+        return None
+    try:
+        async with httpx.AsyncClient(timeout=10) as c:
+            meta=await c.get(f"https://api.telegram.org/bot{BOT_TOKEN}/getFile",params={"file_id":file_id})
+            meta.raise_for_status()
+            file_path=(meta.json().get('result') or {}).get('file_path')
+            if not file_path:
+                return None
+            data=await c.get(f"https://api.telegram.org/file/bot{BOT_TOKEN}/{file_path}")
+            data.raise_for_status()
+            return file_path, data.content
+    except Exception as e:
+        print('Telegram media download error:',e)
+        return None
 
 async def telegram_send_media(path, content_type, caption):
     if not (BOT_TOKEN and CHAT_ID):
@@ -156,6 +187,17 @@ async def chat_send(payload:ChatMessage, request:Request):
     store_message(payload.session_id,msg)
     await broadcast_chat(payload.session_id,msg)
     return {'ok':True,'message':msg}
+
+@app.post('/api/chat/typing')
+async def chat_typing(payload: ChatMessage, request: Request):
+    # Frontend typing indicator -> Telegram bot typing indicator.
+    key=f"typing:{payload.session_id}"
+    now=time.time()
+    last=float(typing_last_sent.get(key,0))
+    if now-last >= 3.0:
+        typing_last_sent[key]=now
+        await telegram_typing()
+    return {'ok':True}
 
 @app.post('/api/chat/send-media')
 async def chat_send_media(
@@ -240,50 +282,87 @@ async def chat_websocket(websocket:WebSocket, session_id:str):
         chat_sockets[session_id].discard(websocket)
 
 async def telegram_poll():
-    global telegram_offset
+    global telegram_offset, last_active_session
     if not BOT_TOKEN:
         return
     url=f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
     while True:
         try:
-            async with httpx.AsyncClient(timeout=30) as c:
-                r=await c.get(url,params={'timeout':20,'offset':telegram_offset+1})
+            async with httpx.AsyncClient(timeout=8) as c:
+                r=await c.get(url,params={'timeout':1,'offset':telegram_offset+1,'allowed_updates':['message']})
                 r.raise_for_status()
                 data=r.json()
-            for update in data.get('result',[]):
+            results=data.get('result',[])
+            for update in results:
                 telegram_offset=max(telegram_offset,int(update['update_id']))
                 msg=update.get('message') or update.get('edited_message')
-                if not msg or not msg.get('text'):
+                if not msg:
                     continue
                 from_id=str((msg.get('chat') or {}).get('id',''))
                 if CHAT_ID and from_id!=CHAT_ID:
                     continue
-                reply=msg['text'].strip()
-                if not reply:
-                    continue
 
-                # Best matching: reply to the visitor's Telegram message.
                 reply_to=(msg.get('reply_to_message') or {}).get('message_id')
                 session_id=telegram_message_sessions.get(str(reply_to)) if reply_to else None
-                # Fallback for one active visitor.
                 if not session_id:
                     session_id=last_active_session
                 if not session_id:
                     continue
+                last_active_session=session_id
 
-                owner_msg={
-                    'id':f"owner-{update['update_id']}",
-                    'sender':'owner',
-                    'text':reply,
-                    'time':datetime.now(timezone.utc).isoformat()
-                }
+                stamp=datetime.now(timezone.utc).isoformat()
+                text=(msg.get('text') or msg.get('caption') or '').strip()
+                base_id=f"owner-{update['update_id']}"
+
+                # Telegram photo: download highest-resolution version and expose it to the web chat.
+                if msg.get('photo'):
+                    photo=max(msg['photo'], key=lambda x:(x.get('width',0)*x.get('height',0)))
+                    downloaded=await telegram_get_file(photo.get('file_id'))
+                    if downloaded:
+                        file_path,data=downloaded
+                        ext=os.path.splitext(file_path)[1].lower() or '.jpg'
+                        safe_name=f"{session_id}-owner-{update['update_id']}{ext}"
+                        safe_path=os.path.join(UPLOAD_DIR,safe_name)
+                        with open(safe_path,'wb') as f: f.write(data)
+                        owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'image/jpeg','time':stamp}
+                    else:
+                        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+
+                elif msg.get('video'):
+                    video=msg['video']
+                    downloaded=await telegram_get_file(video.get('file_id'))
+                    if downloaded:
+                        file_path,data=downloaded
+                        ext=os.path.splitext(file_path)[1].lower() or '.mp4'
+                        safe_name=f"{session_id}-owner-{update['update_id']}{ext}"
+                        safe_path=os.path.join(UPLOAD_DIR,safe_name)
+                        with open(safe_path,'wb') as f: f.write(data)
+                        owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':'video/mp4','time':stamp}
+                    else:
+                        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+
+                elif msg.get('document') and (msg['document'].get('mime_type') or '').startswith(('image/','video/')):
+                    doc=msg['document']
+                    downloaded=await telegram_get_file(doc.get('file_id'))
+                    if downloaded:
+                        file_path,data=downloaded
+                        ext=os.path.splitext(file_path)[1].lower() or '.bin'
+                        safe_name=f"{session_id}-owner-{update['update_id']}{ext}"
+                        safe_path=os.path.join(UPLOAD_DIR,safe_name)
+                        with open(safe_path,'wb') as f: f.write(data)
+                        owner_msg={'id':base_id,'sender':'owner','text':text,'media_url':f"/assets/uploads/{safe_name}",'media_type':doc.get('mime_type'),'time':stamp}
+                    else:
+                        owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+                else:
+                    if not text:
+                        continue
+                    owner_msg={'id':base_id,'sender':'owner','text':text,'time':stamp}
+
                 store_message(session_id,owner_msg)
                 await broadcast_chat(session_id,owner_msg)
         except Exception as e:
             print('Telegram polling error:',e)
-            await asyncio.sleep(5)
-        else:
-            await asyncio.sleep(1)
+            await asyncio.sleep(0.5)
 
 @app.on_event('startup')
 async def startup_chat_poll():
