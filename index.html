@@ -749,6 +749,74 @@
       margin-top: 8px
     }
 
+    /* Instagram-style chat replies */
+    .chat-quick-replies {
+      display: flex;
+      gap: 7px;
+      overflow-x: auto;
+      padding: 3px 1px 8px;
+      margin-top: 8px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch
+    }
+
+    .chat-quick-replies::-webkit-scrollbar {
+      display: none
+    }
+
+    .chat-quick {
+      flex: 0 0 auto;
+      border: 1px solid #ead1d9;
+      background: #fff;
+      color: #7e4657;
+      border-radius: 999px;
+      min-height: 36px;
+      padding: 7px 12px;
+      font-size: 11px;
+      font-weight: 650;
+      cursor: pointer;
+      white-space: nowrap
+    }
+
+    .chat-quick:active {
+      transform: scale(.95)
+    }
+
+    .chat-custom-row {
+      display: none;
+      gap: 7px;
+      margin-top: 7px
+    }
+
+    .chat-custom-row.show {
+      display: flex
+    }
+
+    .chat-custom-row .chat-input {
+      flex: 1;
+      min-width: 0
+    }
+
+    .chat-custom-cancel {
+      border: 0;
+      background: transparent;
+      color: #a16c7d;
+      font-size: 11px;
+      padding: 0 5px
+    }
+
+    .chat-sent-status {
+      min-height: 12px;
+      font-size: 9px;
+      color: #a28790;
+      text-align: right;
+      margin-top: 4px
+    }
+
+    .chat-send:disabled {
+      opacity: .55
+    }
+
     .chat-typing {
       display: none;
       font-size: 10px;
@@ -1061,6 +1129,69 @@
       .back-start {
         width: auto;
         max-width: 180px
+      }
+    }
+
+    /* Mobile-safe controls */
+    .btn {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      line-height: 1.25;
+      text-align: center
+    }
+
+    .final-actions {
+      grid-template-columns: 1fr
+    }
+
+    .final-actions .btn {
+      min-height: 56px;
+      height: auto;
+      padding: 12px 14px
+    }
+
+    .game-choice {
+      grid-template-columns: 1fr
+    }
+
+    @media (min-width:460px) {
+      .final-actions {
+        grid-template-columns: 1fr 1fr
+      }
+
+      .game-choice {
+        grid-template-columns: 1fr 1fr
+      }
+    }
+
+    .page-flower {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 70;
+      pointer-events: none;
+      font-size: clamp(18px, 5vw, 28px);
+      opacity: 0;
+      will-change: transform, opacity;
+      animation: pageFlowerFall 1.25s cubic-bezier(.2, .72, .32, 1) forwards
+    }
+
+    @keyframes pageFlowerFall {
+      0% {
+        opacity: 0;
+        transform: translate3d(0, -10vh, 0) rotate(0) scale(.65)
+      }
+
+      12% {
+        opacity: .95
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate3d(var(--dx), 110vh, 0) rotate(var(--rot)) scale(1)
       }
     }
 
@@ -1480,18 +1611,33 @@
             </div>
 
             <div class="chat-messages" id="chatMessages">
-              <div class="chat-empty" id="chatEmpty">If you want to chat, you can. (optional) 🌷<br>Jo mann mein ho, bas
-                yahin likh dena.</div>
+              <div class="chat-empty" id="chatEmpty">If you want to chat, you can. 🌷<br>Quick reply choose karo ya apna
+                message likho.</div>
             </div>
             <div class="chat-typing" id="chatTyping">Typing… ✨</div>
-
-            <div class="chat-compose">
-              <input id="chatInput" class="chat-input" maxlength="800" placeholder="Write a message…"
-                title="Type /game to open the secret game" aria-label="Message. Type /game to open the secret game."
-                autocomplete="off" />
-              <button class="chat-send" id="chatSend" aria-label="Send message">➤</button>
+            <div class="chat-quick-replies" id="chatQuickReplies">
+              <button class="chat-quick" type="button" data-message="Thank you ❤️">Thank you ❤️</button>
+              <button class="chat-quick" type="button" data-message="Mujhe bhi tum pasand ho 🥹">Mujhe bhi tum pasand ho
+                🥹</button>
+              <button class="chat-quick" type="button" data-message="Mujhe thoda time chahiye 🌷">Mujhe thoda time
+                chahiye 🌷</button>
+              <button class="chat-quick" type="button" data-message="Mujhe tumse kuch poochna hai 👀">Mujhe kuch poochna
+                hai 👀</button>
+              <button class="chat-quick" type="button" data-message="Let's talk 😊">Let's talk 😊</button>
+              <button class="chat-quick" id="customMessageBtn" type="button">✍️ Custom</button>
             </div>
-            <div class="chat-note">Text chat only — jo mann mein ho, bas yahin likh dena. ❤️<br><span
+            <div class="chat-custom-row" id="chatCustomRow">
+              <input id="chatCustomInput" class="chat-input" maxlength="800" placeholder="Apna message likho…"
+                autocomplete="off" />
+              <button class="chat-custom-cancel" id="chatCustomCancel" type="button">Cancel</button>
+            </div>
+            <div class="chat-compose">
+              <input id="chatInput" class="chat-input" maxlength="800" placeholder="Message…"
+                title="Type /game to open the secret game" aria-label="Message" autocomplete="off" />
+              <button class="chat-send" id="chatSend" type="button" aria-label="Send message">➤</button>
+            </div>
+            <div class="chat-sent-status" id="chatSentStatus"></div>
+            <div class="chat-note">Quick reply tap karo ya Custom se apni baat likho. ❤️<br><span
                 class="game-hint">/game · secret game</span></div>
           </div>
           <a class="instagram-cta" href="https://instagram.com/_ashutosh_archer" target="_blank"
@@ -1818,157 +1964,64 @@
       setTimeout(() => toast.classList.remove('show'), 1800);
     }
 
-    /* Optional two-way text chat */
+    /* Instagram-style text chat */
     const chatMessages = document.getElementById('chatMessages');
     const chatInput = document.getElementById('chatInput');
     const chatSend = document.getElementById('chatSend');
     const chatEmpty = document.getElementById('chatEmpty');
     const chatTyping = document.getElementById('chatTyping');
+    const chatCustomBtn = document.getElementById('customMessageBtn');
+    const chatCustomRow = document.getElementById('chatCustomRow');
+    const chatCustomInput = document.getElementById('chatCustomInput');
+    const chatCustomCancel = document.getElementById('chatCustomCancel');
+    const chatSentStatus = document.getElementById('chatSentStatus');
     let chatSeen = new Set();
     let chatBusy = false;
+
+    function formatChatTime(iso) { try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; } }
     function addChatMessage(text, mine = false, stamp = '') {
       if (!chatMessages) return; if (chatEmpty) chatEmpty.remove();
       const bubble = document.createElement('div'); bubble.className = 'chat-msg ' + (mine ? 'me' : 'them');
       if (text) { const body = document.createElement('div'); body.textContent = text; bubble.appendChild(body); }
-      if (stamp) { const time = document.createElement('span'); time.className = 'chat-time'; time.textContent = stamp; bubble.appendChild(time); }
+      if (stamp) { const t = document.createElement('span'); t.className = 'chat-time'; t.textContent = stamp; bubble.appendChild(t); }
       chatMessages.appendChild(bubble); chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    function formatChatTime(iso) { try { return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); } catch { return ''; } }
-
-    let instagramPending = false;
-    document.querySelectorAll('.instagram-cta').forEach(link => {
-      link.addEventListener('click', () => {
-        instagramPending = true;
-        sessionStorage.setItem('instagram_pending', '1');
-        sendEventBeacon('instagram_open', window.__currentPageId || 'unknown', 'Instagram profile link tapped/opened');
-      }, { passive: true });
-    });
-    window.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible' && (instagramPending || sessionStorage.getItem('instagram_pending') === '1')) {
-        instagramPending = false;
-        sessionStorage.removeItem('instagram_pending');
-        sendEvent('instagram_returned', window.__currentPageId || 'unknown', 'Returned after Instagram open attempt');
-      }
-    });
-
-    let chatSocket = null;
-    let chatSocketRetry = null;
-
-    function connectChatSocket() {
-      try {
-        const base = new URL(BACKEND_URL);
-        base.protocol = base.protocol === 'https:' ? 'wss:' : 'ws:';
-        chatSocket = new WebSocket(`${base.origin}/ws/chat/${encodeURIComponent(sessionId)}`);
-        chatSocket.onopen = () => {
-          chatSocketRetry = 0;
-          try { chatSocket.send('ready'); } catch { }
-          clearInterval(window.__chatWsPing);
-          window.__chatWsPing = setInterval(() => {
-            if (chatSocket?.readyState === WebSocket.OPEN) { try { chatSocket.send('ping'); } catch { } }
-          }, 20000);
-        };
-        chatSocket.onmessage = e => {
-          try {
-            const payload = JSON.parse(e.data);
-            if (payload.type === 'ready' || payload.type === 'pong') return;
-            renderChatMessageOnce(payload);
-          } catch (err) { console.debug('Chat websocket message:', err); }
-        };
-        chatSocket.onclose = () => {
-          clearInterval(window.__chatWsPing);
-          if (chatSocketRetry !== null) return;
-          chatSocketRetry = setTimeout(() => { chatSocketRetry = null; connectChatSocket(); }, 3000);
-        };
-        chatSocket.onerror = () => { try { chatSocket.close(); } catch { } };
-      } catch (e) { console.debug('Chat websocket unavailable:', e); }
-    }
-
     function renderChatMessageOnce(m) {
-      if (!m) return; const key = String(m.id || m.time || m.text); if (chatSeen.has(key)) return; chatSeen.add(key);
+      if (!m) return; const key = String(m.id || ((m.sender || '') + '-' + (m.time || '') + '-' + (m.text || '')));
+      if (chatSeen.has(key)) return; chatSeen.add(key);
       addChatMessage(m.text, m.sender === 'visitor', formatChatTime(m.time));
     }
+    function openCustom() { chatCustomRow?.classList.add('show'); chatCustomInput?.focus(); }
+    function closeCustom() { chatCustomRow?.classList.remove('show'); if (chatCustomInput) chatCustomInput.value = ''; }
+    chatCustomBtn?.addEventListener('click', openCustom); chatCustomCancel?.addEventListener('click', closeCustom);
 
-    async function loadChat() {
+    async function sendChatMessage(raw) {
+      if (chatBusy) return false; const text = (raw || '').trim(); if (!text) return false;
+      if (text.toLowerCase() === '/game') { addChatMessage(text, true, formatChatTime(new Date().toISOString())); chatInput.value = ''; closeCustom(); startGame(); return true; }
+      chatBusy = true; chatSend.disabled = true; chatSentStatus.textContent = 'Sending…';
       try {
-        const r = await fetch(`${BACKEND_URL}/api/chat/messages?session_id=${encodeURIComponent(sessionId)}`);
-        if (!r.ok) return;
-        const data = await r.json();
-        (data.messages || []).forEach(renderChatMessageOnce);
-      } catch (e) { console.debug('Chat poll:', e); }
+        const r = await fetch(`${BACKEND_URL}/api/chat/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, text }), keepalive: true });
+        const data = await r.json().catch(() => null);
+        if (!r.ok || !data?.ok) throw new Error(data?.detail || 'send failed');
+        if (data.message) renderChatMessageOnce(data.message); else addChatMessage(text, true, formatChatTime(new Date().toISOString()));
+        chatInput.value = ''; closeCustom(); chatSentStatus.textContent = 'Sent ✓'; setTimeout(() => { chatSentStatus.textContent = ''; }, 1500); return true;
+      } catch (e) { console.error(e); chatSentStatus.textContent = 'Couldn’t send — tap again'; return false; }
+      finally { chatBusy = false; chatSend.disabled = false; }
     }
+    chatSend?.addEventListener('click', () => sendChatMessage(chatCustomRow?.classList.contains('show') ? chatCustomInput.value : chatInput.value));
+    chatInput?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(chatInput.value); } });
+    chatCustomInput?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChatMessage(chatCustomInput.value); } });
+    document.querySelectorAll('.chat-quick[data-message]').forEach(b => b.addEventListener('click', () => sendChatMessage(b.dataset.message)));
 
-    connectChatSocket();
-    loadChat();
-    // REST is only a fallback; WebSocket is the primary realtime channel.
-    window.__chatRestFallback = setInterval(loadChat, 15000);
-
-    let typingLastSent = 0;
-    let typingTimer = null;
-    async function sendTypingIndicator() {
-      const now = Date.now();
-      if (now - typingLastSent < 2500) return;
-      typingLastSent = now;
+    async function loadChatMessages() { try { const r = await fetch(`${BACKEND_URL}/api/chat/messages?session_id=${encodeURIComponent(sessionId)}`); if (!r.ok) return; const d = await r.json(); (d.messages || []).forEach(renderChatMessageOnce); } catch (e) { console.debug('Chat history unavailable', e); } }
+    function connectChatSocket() {
       try {
-        await fetch(`${BACKEND_URL}/api/chat/typing`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session_id: sessionId, text: 'typing' })
-        });
-      } catch { }
+        const proto = location.protocol === 'https:' ? 'wss' : 'ws'; const ws = new WebSocket(`${proto}://${new URL(BACKEND_URL).host}/ws/chat/${encodeURIComponent(sessionId)}`);
+        ws.onmessage = e => { try { const m = JSON.parse(e.data); if (m?.sender) renderChatMessageOnce(m); } catch { } };
+        ws.onclose = () => setTimeout(connectChatSocket, 4000); ws.onerror = () => { try { ws.close() } catch { } }; window.__chatSocket = ws;
+      } catch (e) { console.debug('Chat websocket unavailable', e); }
     }
-    function handleChatTyping() {
-      if (chatInput.value.trim()) sendTypingIndicator();
-      clearTimeout(typingTimer);
-      typingTimer = setTimeout(() => { }, 300);
-    }
-    chatInput.addEventListener('input', handleChatTyping);
-
-    async function sendChat() {
-      if (chatBusy || !chatInput) return; const text = chatInput.value.trim(); if (!text) return;
-      if (text.toLowerCase() === '/game') { addChatMessage(text, true, formatChatTime(new Date().toISOString())); chatInput.value = ''; startGame(); return; }
-      chatBusy = true; chatSend.disabled = true;
-      try { const r = await fetch(`${BACKEND_URL}/api/chat/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, text }) }); if (!r.ok) throw new Error('send failed'); const result = await r.json(); if (result.message) renderChatMessageOnce(result.message); chatInput.value = ''; }
-      catch (e) { toast.textContent = 'Message send nahi hua. Thodi der baad try karna. 🌷'; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2200); }
-      finally { chatBusy = false; chatSend.disabled = false; chatTyping?.classList.remove('show'); }
-    }
-
-    chatSend.addEventListener('click', sendChat);
-    chatInput.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-    });
-
-
-    document.querySelectorAll('.photo img').forEach(img => { img.loading = 'lazy'; img.decoding = 'async'; });
-
-    (function createAtmosphere() {
-      const petals = document.getElementById('petals');
-      const sparkles = document.getElementById('sparkles');
-      const petalChars = ['🌸', '✿', '❀', '♡'];
-      for (let i = 0; i < 18; i++) {
-        const e = document.createElement('div');
-        e.className = 'petal';
-        e.textContent = petalChars[Math.floor(Math.random() * petalChars.length)];
-        e.style.left = Math.random() * 100 + 'vw';
-        e.style.setProperty('--x', (Math.random() * 90 - 45) + 'px');
-        e.style.animationDuration = (9 + Math.random() * 11) + 's';
-        e.style.animationDelay = (-Math.random() * 15) + 's';
-        e.style.fontSize = (11 + Math.random() * 10) + 'px';
-        petals.appendChild(e);
-      }
-      for (let i = 0; i < 14; i++) {
-        const e = document.createElement('div');
-        e.className = 'spark';
-        e.textContent = '✦';
-        e.style.left = Math.random() * 100 + 'vw';
-        e.style.top = Math.random() * 100 + 'vh';
-        e.style.animationDelay = (Math.random() * 3) + 's';
-        sparkles.appendChild(e);
-      }
-    })();
-
-    // A playful but touch-friendly optional “No” behavior for the first question.
-    // A real no is never blocked; tapping “No” simply shows a gentle retry message.
-    window.addEventListener('load', () => { show('s1', false); sendEvent('page_opened', 's1', PAGE_LABELS.s1); });
+    loadChatMessages(); connectChatSocket();
   </script>
 </body>
 
