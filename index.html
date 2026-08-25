@@ -92,14 +92,143 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
 .confetti{position:fixed;z-index:50;pointer-events:none;font-size:18px;animation:confetti 1.9s cubic-bezier(.17,.67,.37,1) forwards}
 @keyframes confetti{0%{transform:translate3d(0,0,0) rotate(0);opacity:1}100%{transform:translate3d(var(--dx),var(--dy),0) rotate(420deg);opacity:0}}
 .footer{text-align:center;padding-top:14px;color:#ad8d98;font-size:10px;letter-spacing:.05em}
+
+/* Optional two-way chat */
+.chat-panel{width:100%;margin-top:22px;text-align:left;border:1px solid rgba(200,90,119,.14);background:rgba(255,255,255,.62);border-radius:24px;padding:14px;box-shadow:0 14px 35px rgba(103,43,63,.09);overflow:hidden}
+.chat-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+.chat-title{font-family:Georgia,serif;font-size:21px;color:#522838}
+.chat-status{font-size:10px;color:#9b7e87;letter-spacing:.05em}
+.chat-status::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#77b58b;margin-right:6px;box-shadow:0 0 0 4px rgba(119,181,139,.12)}
+.chat-messages{height:180px;overflow-y:auto;padding:4px 2px 8px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+.chat-empty{font-size:12px;line-height:1.55;color:#9b7e87;text-align:center;padding:45px 18px 20px}
+.chat-msg{max-width:82%;padding:9px 12px;border-radius:16px;font-size:13px;line-height:1.45;word-break:break-word;animation:chatIn .35s cubic-bezier(.22,1,.36,1)}
+.chat-msg.them{align-self:flex-start;background:#fff;border:1px solid #f0d8df;color:#654550;border-bottom-left-radius:5px}
+.chat-msg.me{align-self:flex-end;background:linear-gradient(135deg,#b84566,#8d2b4c);color:#fff;border-bottom-right-radius:5px}
+.chat-time{display:block;font-size:9px;opacity:.65;margin-top:4px}
+@keyframes chatIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.chat-compose{display:flex;gap:8px;margin-top:8px}
+.chat-input{min-width:0;flex:1;border:1px solid #ead1d9;background:#fff;border-radius:16px;padding:12px 13px;outline:none;color:var(--ink);font:inherit;font-size:13px;transition:border-color .2s,box-shadow .2s}
+.chat-input:focus{border-color:#c85a77;box-shadow:0 0 0 4px rgba(200,90,119,.09)}
+.chat-send{border:0;width:48px;min-width:48px;border-radius:16px;background:linear-gradient(135deg,#b84566,#8d2b4c);color:#fff;cursor:pointer;box-shadow:0 8px 18px rgba(141,43,76,.18);transition:transform .2s}
+.chat-send:active{transform:scale(.94)}
+.chat-note{font-size:10px;color:#a28790;text-align:center;margin-top:8px}
+.chat-typing{display:none;font-size:10px;color:#9b7e87;padding:0 4px 4px}
+.chat-typing.show{display:block}
+.chat-pulse{animation:chatPulse 2.2s ease-in-out infinite}
+@keyframes chatPulse{0%,100%{box-shadow:0 14px 35px rgba(103,43,63,.09)}50%{box-shadow:0 16px 42px rgba(200,90,119,.18)}}
+
+
+/* Timed reading actions */
+.timed-wrap{position:relative;width:100%}
+.timed-btn{position:relative;overflow:hidden}
+.timed-btn:disabled{cursor:not-allowed;opacity:.72;filter:saturate(.7);transform:none!important;box-shadow:none}
+.timed-btn .unlock-count{font-size:11px;opacity:.9;font-weight:700;min-width:64px}
+.timed-btn.unlocking{animation:softUnlock .75s cubic-bezier(.22,1,.36,1)}
+@keyframes softUnlock{0%{transform:scale(.97);box-shadow:0 0 0 0 rgba(200,90,119,0)}50%{transform:scale(1.025);box-shadow:0 0 0 9px rgba(200,90,119,.10)}100%{transform:scale(1);box-shadow:none}}
+
+/* Instagram CTA */
+.instagram-cta{display:flex;align-items:center;gap:11px;margin:18px auto 4px;padding:11px 14px;max-width:390px;border:1px solid #efd7df;border-radius:18px;background:rgba(255,255,255,.68);text-decoration:none;color:#6d4351;box-shadow:0 9px 22px rgba(103,43,63,.06);transition:transform .2s ease,box-shadow .2s ease}
+.instagram-cta:hover{transform:translateY(-1px);box-shadow:0 12px 26px rgba(103,43,63,.10)}
+.instagram-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:10px;background:linear-gradient(135deg,#f7d6df,#e8bfd0);color:#7e2745;font-weight:900;font-size:17px}
+.instagram-cta-text{min-width:0;text-align:left;line-height:1.25}
+.instagram-cta-text strong{display:block;font-size:12px;color:#5a2e40}
+.instagram-cta-text span{display:block;font-size:10px;color:#9b7e87;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Yes-page celebration */
+.celebration-layer{position:fixed;inset:0;z-index:60;pointer-events:none;overflow:hidden}
+.celebration-particle{position:absolute;left:50%;top:50%;font-size:20px;opacity:0;animation:celebrateFly 2.2s cubic-bezier(.17,.67,.37,1) forwards}
+@keyframes celebrateFly{0%{opacity:0;transform:translate3d(0,15px,0) scale(.5) rotate(0)}12%{opacity:1}100%{opacity:0;transform:translate3d(var(--dx),var(--dy),0) scale(1) rotate(var(--rot))}}
+.heart-transition{position:fixed;left:50%;top:50%;z-index:65;pointer-events:none;font-size:clamp(110px,28vw,190px);line-height:1;transform:translate(-50%,-50%) scale(.15);opacity:0;filter:drop-shadow(0 18px 35px rgba(184,69,102,.28));animation:heartGameTransition 1.65s cubic-bezier(.16,1,.3,1) forwards}
+.heart-transition::after{content:"";position:absolute;inset:-35%;border-radius:50%;border:2px solid rgba(200,90,119,.22);transform:scale(.35);opacity:0;animation:heartRing 1.25s .18s ease-out forwards}
+@keyframes heartGameTransition{0%{opacity:0;transform:translate(-50%,-50%) scale(.12)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.18)}35%{transform:translate(-50%,-50%) scale(.92)}52%{transform:translate(-50%,-50%) scale(1.04)}72%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(2.5)}}
+@keyframes heartRing{0%{opacity:0;transform:scale(.35)}20%{opacity:1}100%{opacity:0;transform:scale(1.55)}}
+
 @media (min-width:700px){.app{padding-top:30px}.card{padding:36px 32px 28px}.btns{max-width:390px;margin-left:auto;margin-right:auto}.topbar{padding-top:0}}
 @media (max-height:680px) and (max-width:520px){.card{padding:22px 16px 18px}h1{font-size:30px}.photo.tall{min-height:275px}.photo.small{height:132px}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition:none!important}}
+
+/* Collage motion */
+.photo-grid{perspective:900px}
+.photo{
+  opacity:0;
+  transform:translateY(26px) scale(.97) rotateX(3deg);
+  animation:photoReveal .85s cubic-bezier(.22,1,.36,1) forwards;
+  will-change:transform,opacity;
+}
+.photo:nth-child(1){animation-delay:.08s}
+.photo:nth-child(2){animation-delay:.20s}
+.photo:nth-child(3){animation-delay:.32s}
+.photo:hover img{transform:scale(1.045)}
+.photo img{transition:transform 1.1s cubic-bezier(.22,1,.36,1)}
+.photo::after{transition:opacity .6s ease}
+.photo:hover::after{opacity:.78}
+@keyframes photoReveal{
+  0%{opacity:0;transform:translateY(26px) scale(.97) rotateX(3deg)}
+  55%{opacity:1}
+  100%{opacity:1;transform:translateY(0) scale(1) rotateX(0)}
+}
+@keyframes photoFloat1{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-7px) rotate(.25deg)}
+}
+@keyframes photoFloat2{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(6px) rotate(-.25deg)}
+}
+@keyframes photoFloat3{
+  0%,100%{transform:translateY(0) rotate(0)}
+  50%{transform:translateY(-4px) rotate(.2deg)}
+}
+.photo-grid.is-visible .photo:nth-child(1){animation:photoReveal .85s cubic-bezier(.22,1,.36,1) .08s forwards,photoFloat1 5.5s ease-in-out 1.05s infinite}
+.photo-grid.is-visible .photo:nth-child(2){animation:photoReveal .85s cubic-bezier(.22,1,.36,1) .20s forwards,photoFloat2 6.2s ease-in-out 1.15s infinite}
+.photo-grid.is-visible .photo:nth-child(3){animation:photoReveal .85s cubic-bezier(.22,1,.36,1) .32s forwards,photoFloat3 5.9s ease-in-out 1.25s infinite}
+
+/* Chat media actions */
+.chat-actions{display:flex;gap:7px;align-items:center}
+.chat-media-btn{
+  width:42px;height:42px;border:1px solid #ead1d9;background:#fff;border-radius:14px;
+  color:#7e4657;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:transform .2s ease,background .2s ease,box-shadow .2s ease;
+}
+.chat-media-btn:hover{background:#fff6f8;box-shadow:0 7px 16px rgba(93,42,59,.08)}
+.chat-media-btn:active{transform:scale(.93)}
+.chat-file-name{font-size:10px;color:#9b7e87;margin:7px 2px 0;display:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-file-name.show{display:block}
+.chat-media-preview{display:none;margin:8px 0 0;padding:8px;border:1px solid #efd9e0;background:#fff;border-radius:14px}
+.chat-media-preview.show{display:block}
+.chat-media-preview-inner{display:flex;align-items:center;gap:10px}
+.chat-media-thumb{width:48px;height:48px;border-radius:10px;object-fit:cover;background:#f5e8ed}
+.chat-media-meta{min-width:0;flex:1}
+.chat-media-meta strong{display:block;font-size:11px;color:#674550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chat-media-meta span{font-size:9px;color:#a28790}
+.chat-clear-file{border:0;background:transparent;color:#a16c7d;cursor:pointer;font-size:16px}
+.chat-msg.media{padding:7px}
+.chat-msg.media img,.chat-msg.media video{display:block;max-width:210px;max-height:240px;border-radius:11px}
+.chat-msg.media a{color:inherit;text-decoration:none;font-size:12px;display:flex;gap:7px;align-items:center}
+@media (prefers-reduced-motion:reduce){
+  .photo,.photo-grid.is-visible .photo:nth-child(1),.photo-grid.is-visible .photo:nth-child(2),.photo-grid.is-visible .photo:nth-child(3){animation:none!important;opacity:1!important;transform:none!important}
+}
+
+
+/* Game */
+.game-card{text-align:center}
+.game-status{font-size:12px;color:#9b7e87;margin:8px auto 16px;line-height:1.55}
+.game-choice{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.game-choice .btn{min-height:58px}
+.game-result{min-height:56px;margin-top:16px;padding:13px;border-radius:18px;background:#fff6f8;border:1px solid #f0d8df;color:#6d4351;font-size:13px;line-height:1.5}
+.back-start{width:auto;min-height:38px;padding:0 14px;font-size:11px;margin:12px auto 0;letter-spacing:.02em}
+.time-collage{display:grid;grid-template-columns:1.15fr .85fr;grid-template-rows:150px 150px;gap:10px;margin:4px 0 20px}
+.time-collage .photo{min-height:0!important;height:auto!important}
+.time-collage .photo:first-child{grid-row:span 2}
+.chat-note strong{color:#7e2745}
+.game-hint{display:inline-block;margin-top:4px;color:#a28790;font-size:9px;letter-spacing:.02em;opacity:.85}
+
 </style>
 </head>
 <body>
 <div id="bg"><div class="orb one"></div><div class="orb two"></div><div class="orb three"></div></div>
 <div class="petals" id="petals"></div><div class="sparkles" id="sparkles"></div><div id="yesNo"><div class="toast" id="toast"></div></div>
+<div class="celebration-layer" id="celebrationLayer"></div>
 
 <main class="app">
   <div class="shell">
@@ -131,6 +260,9 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
           <button class="btn ghost" id="noListen" onclick="handleNoListen()">No 🙈</button>
         </div>
         <div class="small-note" id="listenHint">Ek honest baat hai… bas ek baar sun lena. 🌷</div>
+        <a class="instagram-cta" href="https://instagram.com/_ashutosh_archer" target="_blank" rel="noopener noreferrer" aria-label="Follow Ashutosh on Instagram">
+          <span class="instagram-icon">◎</span><span class="instagram-cta-text"><strong>Follow me on Instagram</strong><span>@_ashutosh_archer</span></span>
+        </a>
       </div>
     </section>
 
@@ -145,7 +277,7 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
           <p>Toh jo bhi pehle hua, please usse meri actual baat se alag rakhna. Main bas tumse genuinely aur respectfully kehna chahta tha ki <strong>main kya feel karta hoon.</strong></p>
         </div>
         <div class="chips"><span class="chip">no drama</span><span class="chip">no pressure</span><span class="chip">just honest</span></div>
-        <div class="btns"><button class="btn primary" onclick="trackAndNext('continued_after_intro','s4')">Okay… ab asli baat ❤️</button></div>
+        <div class="btns"><button class="btn primary timed-btn" data-unlock-delay="4" data-original-label="Okay… ab asli baat ❤️" onclick="trackAndNext('continued_after_intro','s4')"><span class="btn-label">Okay… ab asli baat ❤️</span><span class="unlock-count">4s</span></button></div>
       </div>
     </section>
 
@@ -162,7 +294,10 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
           <p>Tum bohot sundar ho — meri nazar mein. Tumhari aankhein, tumhari smile, tumhari baatein… pata nahi, mujhe genuinely sab kuch bahut achha lagta hai.</p>
           <p>Itni pyaari si ho tum ki kabhi-kabhi bas dekh ke hi smile aa jaati hai. 🥹</p>
         </div>
-        <div class="btns"><button class="btn primary" onclick="trackAndNext('read_feelings','s5')">One last thing…</button></div>
+        <a class="instagram-cta" href="https://instagram.com/_ashutosh_archer" target="_blank" rel="noopener noreferrer" aria-label="Follow Ashutosh on Instagram">
+          <span class="instagram-icon">◎</span><span class="instagram-cta-text"><strong>Follow me on Instagram</strong><span>@_ashutosh_archer</span></span>
+        </a>
+        <div class="btns"><button class="btn primary timed-btn" data-unlock-delay="4" data-original-label="One last thing…" onclick="trackAndNext('read_feelings','s5')"><span class="btn-label">One last thing…</span><span class="unlock-count">4s</span></button></div>
       </div>
     </section>
 
@@ -179,9 +314,12 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
         <div class="choice-card">
           <div class="big-question">So… kya kehti ho? 🫣</div>
           <div class="final-actions">
-            <button class="btn primary" onclick="answerYes()">Haan ❤️</button>
-            <button class="btn secondary" onclick="answerMaybe()">Mujhe thoda time chahiye 🌷</button>
+            <button class="btn primary timed-btn" data-unlock-delay="4" data-original-label="Haan ❤️" onclick="answerYes()"><span class="btn-label">Haan ❤️</span><span class="unlock-count">4s</span></button>
+            <button class="btn secondary timed-btn" data-unlock-delay="4" data-original-label="Mujhe thoda time chahiye 🌷" onclick="answerMaybe()"><span class="btn-label">Mujhe thoda time chahiye 🌷</span><span class="unlock-count">4s</span></button>
           </div>
+          <a class="instagram-cta" href="https://instagram.com/_ashutosh_archer" target="_blank" rel="noopener noreferrer" aria-label="Follow Ashutosh on Instagram">
+            <span class="instagram-icon">◎</span><span class="instagram-cta-text"><strong>More of me on Instagram</strong><span>@_ashutosh_archer</span></span>
+          </a>
           <div class="reassure">“Time chahiye” is completely okay. Main seriously mean kar raha hoon — no pressure.</div>
         </div>
       </div>
@@ -190,13 +328,78 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
     <section class="screen" id="s6">
       <div class="card center final-card" style="flex:1">
         <div class="end-icon">🥹❤️</div>
-        <div class="eyebrow">my favorite answer</div>
-        <div class="result-title">Yeh smile screen pe nahi, real life mein chahiye.</div>
-        <p class="quote">“Baaki sab baad mein. Pehle ek proper private conversation — sirf tum aur main.”</p>
+        <div class="eyebrow">one last little thing</div>
+        <div class="result-title">Yrr Agar tum smile kar rahi ho… na toh  mission successful. ✨</div>
+        <p class="quote">“Ab koi long bak-bak nahi. Bas agar tum chaaho, toh mujhse directly baat kar lena.”</p>
+
+        <div class="chat-panel chat-pulse">
+          <div class="chat-head">
+            <div>
+              <div class="chat-title">Baat karni hai? 💬</div>
+              <div class="chat-status">optional • private chat</div>
+            </div>
+            <span class="tap-heart">♡</span>
+          </div>
+
+          <div class="chat-messages" id="chatMessages">
+            <div class="chat-empty" id="chatEmpty">If you want to chat, you can. (optional) 🌷<br>Jo mann mein ho, bas yahin likh dena.</div>
+          </div>
+          <div class="chat-typing" id="chatTyping">Typing… ✨</div>
+
+          <div class="chat-media-preview" id="chatMediaPreview">
+            <div class="chat-media-preview-inner">
+              <img id="chatMediaThumb" class="chat-media-thumb" alt="Selected media preview" />
+              <div class="chat-media-meta">
+                <strong id="chatFileName">Selected media</strong>
+                <span id="chatFileMeta"></span>
+              </div>
+              <button class="chat-clear-file" id="chatClearFile" type="button" aria-label="Remove selected file">×</button>
+            </div>
+          </div>
+          <div class="chat-file-name" id="chatFileNameLegacy"></div>
+
+          <div class="chat-compose">
+            <div class="chat-actions">
+              <button class="chat-media-btn" id="chatCamera" type="button" aria-label="Take a photo or selfie">📷</button>
+              <button class="chat-media-btn" id="chatGallery" type="button" aria-label="Choose photo or video">📎</button>
+            </div>
+            <input id="chatInput" class="chat-input" maxlength="800"
+                   placeholder="Write a message…"
+                   title="Type /game to open the secret game"
+                   aria-label="Message. Type /game to open the secret game."
+                   autocomplete="off" />
+            <button class="chat-send" id="chatSend" aria-label="Send message">➤</button>
+          </div>
+          <input id="chatCameraInput" type="file" accept="image/*" capture="user" hidden />
+          <input id="chatGalleryInput" type="file" accept="image/*,video/*" hidden />
+          <div class="chat-note">Camera 📷 • photos/selfies • videos • text — jo chaaho bhej sakti ho. ❤️<br><span class="game-hint">/game · secret game</span></div>
+        </div>
+        <a class="instagram-cta" href="https://instagram.com/_ashutosh_archer" target="_blank" rel="noopener noreferrer" aria-label="Follow Ashutosh on Instagram">
+          <span class="instagram-icon">◎</span><span class="instagram-cta-text"><strong>Follow me on Instagram</strong><span>@_ashutosh_archer</span></span>
+        </a>
+
         <div class="btns">
           <button class="btn primary" onclick="celebrateAgain()">Okay, now smile 😭❤️</button>
+          <button class="btn ghost back-start" type="button" onclick="restart()">← first screen</button>
         </div>
-        <div class="small-note">Thank you for reading all the way till here.</div>
+        <div class="small-note">Thank you for reading all the way till here. No pressure, ever. 🌷</div>
+      </div>
+    </section>
+
+
+    <section class="screen" id="game">
+      <div class="card game-card" style="flex:1">
+        <div class="eyebrow">mini game • secret mode</div>
+        <div class="heart">🎮</div>
+        <h1 style="font-size:34px">Pick one…<span class="soft">let's see what you choose 👀</span></h1>
+        <p class="lead">Koi timer nahi, koi pressure nahi. Bas ek cute little game. ❤️</p>
+        <div class="game-status" id="gameStatus">Question 1 • 3 rounds</div>
+        <div class="game-result" id="gameResult">Ready? Choose your answer below. 🌷</div>
+        <div class="game-choice" id="gameChoices">
+          <button class="btn primary" data-choice="A">Coffee date ☕</button>
+          <button class="btn secondary" data-choice="B">Long walk 🌆</button>
+        </div>
+        <button class="btn ghost back-start" type="button" onclick="exitGame()">Exit game</button>
       </div>
     </section>
 
@@ -206,8 +409,13 @@ h1 .soft{display:block;color:var(--rose);font-size:.58em;font-style:italic;line-
         <div class="eyebrow">that's completely okay</div>
         <div class="result-title">Take your time.</div>
         <p class="quote">“Mujhe bas tumhari honest feeling chahiye thi. Aur honestly, tumhara comfort mere liye important hai.”</p>
+        <div class="time-collage">
+          <div class="photo"><img src="image2.jpeg" alt="A special memory"><span>take your time 🌷</span></div>
+          <div class="photo"><img src="image1.jpeg" alt="A sweet moment"><span>no pressure 🤍</span></div>
+          <div class="photo"><img src="image3.jpeg" alt="A happy moment"><span>just smile ✨</span></div>
+        </div>
         <div class="btns">
-          <button class="btn secondary" onclick="restart()">Read it again ↺</button>
+          <button class="btn secondary" onclick="restart()">← first screen</button>
         </div>
       </div>
     </section>
@@ -235,34 +443,172 @@ if (!sessionId) {
   sessionStorage.setItem("proposal_session_id", sessionId);
 }
 
-async function sendEvent(eventName) {
+const PAGE_LABELS = {
+  s1: "Page 1 — Opening",
+  s2: "Page 2 — Do you want to listen?",
+  s3: "Page 3 — Honest intro",
+  s4: "Page 4 — Feelings + photos",
+  s5: "Page 5 — Final choice",
+  s6: "Page 6 — Haan / chat",
+  s7: "Page 7 — Time chahiye",
+  game: "Secret Game — /game"
+};
+
+async function sendEvent(eventName, pageId=null, extra="") {
   try {
+    const activeId = pageId || document.querySelector('.screen.active')?.id || "unknown";
     const response = await fetch(`${BACKEND_URL}/api/event`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: {"Content-Type": "application/json"},
       body: JSON.stringify({
         event: eventName,
         session_id: sessionId,
-        page: window.location.pathname,
-        client_time: new Date().toISOString()
+        page: activeId,
+        client_time: new Date().toISOString(),
+        extra
       })
     });
-
-    if (!response.ok) {
-      console.error("Event failed:", response.status);
-    }
+    if (!response.ok) console.error("Event failed:", response.status);
   } catch (error) {
-    // Tracking must never interrupt the proposal flow.
     console.error("Telegram event error:", error);
   }
 }
 
 function trackAndNext(eventName, nextScreen) {
-  // Do not await analytics; screen transition stays instant.
   sendEvent(eventName);
   next(nextScreen);
+}
+
+function show(id, announce=true){
+  screens.forEach(s=>s.classList.toggle('active',s.id===id));
+  const gallery=document.querySelector('#s4 .photo-grid');
+  if(gallery){
+    gallery.classList.toggle('is-visible',id==='s4');
+    if(id==='s4'){
+      gallery.querySelectorAll('.photo').forEach(p=>{ p.style.animation='none'; void p.offsetWidth; p.style.animation=''; });
+    }
+  }
+  const n=ids.indexOf(id)+1;
+  const visualTotal=6;
+  counter.textContent=ids.includes(id) && id!=='game'
+    ? String(Math.min(n,visualTotal)).padStart(2,'0')+' / '+String(visualTotal).padStart(2,'0')
+    : "🎮";
+  bar.style.width=ids.includes(id) && id!=='game' ? Math.min(100,n/visualTotal*100)+'%' : '100%';
+  prepareTimedButtons(id);
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(announce) sendEvent('page_view', id, PAGE_LABELS[id] || id);
+}
+
+function next(id){
+  gentleHearts(5);
+  show(id);
+}
+
+
+/* 4-second reading unlock for long-context pages */
+const unlockTimers = new Map();
+function prepareTimedButtons(pageId){
+  document.querySelectorAll('.timed-btn').forEach(btn=>{
+    const oldTimer=unlockTimers.get(btn);
+    if(oldTimer){ clearInterval(oldTimer); unlockTimers.delete(btn); }
+    const owner=btn.closest('.screen');
+    const current=owner && owner.id===pageId;
+    const label=btn.querySelector('.btn-label');
+    const count=btn.querySelector('.unlock-count');
+    if(label) label.textContent=btn.dataset.originalLabel || label.textContent;
+    if(!current){
+      btn.disabled=false;
+      btn.classList.remove('unlocking');
+      if(count) count.textContent='';
+      return;
+    }
+    let left=Math.max(0,Number(btn.dataset.unlockDelay||4));
+    btn.disabled=left>0;
+    btn.classList.remove('unlocking');
+    if(count) count.textContent=left>0 ? `${left}s` : 'Ready ✓';
+    if(left<=0) return;
+    const timer=setInterval(()=>{
+      left-=1;
+      if(count) count.textContent=left>0 ? `${left}s` : 'Ready ✓';
+      if(left<=0){
+        clearInterval(timer);
+        unlockTimers.delete(btn);
+        btn.disabled=false;
+        void btn.offsetWidth;
+        btn.classList.add('unlocking');
+        setTimeout(()=>btn.classList.remove('unlocking'),800);
+      }
+    },1000);
+    unlockTimers.set(btn,timer);
+  });
+}
+
+function celebrationBurst(){
+  const layer=document.getElementById('celebrationLayer');
+  if(!layer) return;
+  layer.innerHTML='';
+  const symbols=['❤️','💗','💖','🌸','🌷','✿','❀','✦','♡'];
+  for(let i=0;i<34;i++){
+    const e=document.createElement('div');
+    e.className='celebration-particle';
+    e.textContent=symbols[Math.floor(Math.random()*symbols.length)];
+    e.style.setProperty('--dx',`${Math.random()*180-90}vw`);
+    e.style.setProperty('--dy',`${Math.random()*-75-8}vh`);
+    e.style.setProperty('--rot',`${Math.random()*720-360}deg`);
+    e.style.fontSize=`${14+Math.random()*18}px`;
+    e.style.animationDelay=`${Math.random()*.3}s`;
+    layer.appendChild(e);
+  }
+  setTimeout(()=>layer.innerHTML='',2600);
+}
+
+/* Secret game — only launched by typing /game in chat. No timer. */
+const gameRounds = [
+  {q:"Round 1 • perfect plan?", a:"Coffee date ☕", b:"Long walk 🌆"},
+  {q:"Round 2 • cutest vibe?", a:"Random jokes 😂", b:"Deep talks 🌙"},
+  {q:"Round 3 • one little yes?", a:"Maybe 👀", b:"Definitely ❤️"}
+];
+let gameRound=0;
+let gameScore=0;
+
+function startGame(){
+  gameRound=0; gameScore=0;
+  show('game');
+  renderGameRound();
+  sendEvent('game_started','game','Opened with /game from chat');
+}
+
+function renderGameRound(){
+  const round=gameRounds[gameRound];
+  document.getElementById('gameStatus').textContent=`${round.q} • ${gameRound+1}/3`;
+  document.querySelector('[data-choice="A"]').textContent=round.a;
+  document.querySelector('[data-choice="B"]').textContent=round.b;
+  document.getElementById('gameResult').textContent='Choose one — no right or wrong answer. 🌷';
+}
+
+function chooseGame(choice){
+  gameScore += choice==='A' ? 1 : 0;
+  sendEvent('game_choice','game',`round=${gameRound+1}, choice=${choice}`);
+  if(gameRound < gameRounds.length-1){
+    gameRound++;
+    renderGameRound();
+  }else{
+    document.getElementById('gameStatus').textContent='Game complete ✨';
+    document.getElementById('gameResult').textContent =
+      gameScore>=2 ? 'Okayyy… I knew you had good taste. 🥹❤️' :
+      'Cute choices. I’m counting that as a win anyway. 🌷';
+    document.querySelectorAll('#gameChoices .btn').forEach(b=>b.disabled=true);
+  }
+}
+
+document.querySelectorAll('#gameChoices .btn').forEach(btn=>{
+  btn.addEventListener('click',()=>chooseGame(btn.dataset.choice));
+});
+
+function exitGame(){
+  sendEvent('game_exit','game','Returned to first screen');
+  show('s1');
+  chatInput?.focus();
 }
 
 const hints=[
@@ -272,18 +618,6 @@ const hints=[
   'Last little try. Promise. 😭'
 ];
 let noCount=0;
-function show(id){
-  screens.forEach(s=>s.classList.toggle('active',s.id===id));
-  const n=ids.indexOf(id)+1;
-  const visualTotal=6;
-  counter.textContent=String(Math.min(n,visualTotal)).padStart(2,'0')+' / '+String(visualTotal).padStart(2,'0');
-  bar.style.width=Math.min(100,n/visualTotal*100)+'%';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
-function next(id){
-  gentleHearts(5);
-  show(id);
-}
 function handleNoListen(){
   noCount++;
   sendEvent('listen_no_' + noCount);
@@ -315,12 +649,17 @@ function handleNoListen(){
   setTimeout(()=>toast.classList.remove('show'),1600);
 }
 function answerYes(){
-  sendEvent('final_yes');
-  show('s6');
-  celebrate();
+  sendEvent('final_yes','s5');
+  const heart=document.createElement('div');
+  heart.className='heart-transition';
+  heart.textContent='❤️';
+  document.body.appendChild(heart);
+  celebrateBurstSafe();
+  setTimeout(()=>show('s6'),520);
+  setTimeout(()=>heart.remove(),1750);
 }
 function answerMaybe(){
-  sendEvent('final_need_time');
+  sendEvent('final_need_time','s5');
   show('s7');
   gentleHearts(7);
 }
@@ -341,6 +680,8 @@ function gentleHearts(count){
     setTimeout(()=>e.remove(),2200);
   }
 }
+function celebrateBurstSafe(){ celebrationBurst(); celebrate(); }
+
 function celebrate(){
   gentleHearts(30);
   toast.textContent='Okay… this made me smile too. 🥹❤️';
@@ -348,7 +689,185 @@ function celebrate(){
   setTimeout(()=>toast.classList.remove('show'),1800);
 }
 
-// Create soft floating petals and sparkles — no external assets.
+/* Optional two-way chat + media upload */
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const chatSend = document.getElementById('chatSend');
+const chatEmpty = document.getElementById('chatEmpty');
+const chatTyping = document.getElementById('chatTyping');
+const chatCamera = document.getElementById('chatCamera');
+const chatGallery = document.getElementById('chatGallery');
+const chatCameraInput = document.getElementById('chatCameraInput');
+const chatGalleryInput = document.getElementById('chatGalleryInput');
+const chatMediaPreview = document.getElementById('chatMediaPreview');
+const chatMediaThumb = document.getElementById('chatMediaThumb');
+const chatFileName = document.getElementById('chatFileName');
+const chatFileMeta = document.getElementById('chatFileMeta');
+const chatClearFile = document.getElementById('chatClearFile');
+let chatSeen = new Set();
+let chatBusy = false;
+let selectedChatFile = null;
+let previewObjectUrl = null;
+
+function addChatMessage(text, mine=false, stamp='', mediaUrl='', mediaType=''){
+  if(!chatMessages) return;
+  if(chatEmpty) chatEmpty.remove();
+
+  const bubble=document.createElement('div');
+  bubble.className='chat-msg '+(mine?'me':'them')+(mediaUrl?' media':'');
+  if(mediaUrl && mediaType.startsWith('image/')){
+    const img=document.createElement('img');
+    img.src=mediaUrl; img.alt='Shared photo'; img.loading='lazy';
+    bubble.appendChild(img);
+  } else if(mediaUrl && mediaType.startsWith('video/')){
+    const video=document.createElement('video');
+    video.src=mediaUrl; video.controls=true; video.playsInline=true;
+    bubble.appendChild(video);
+  }
+  if(text){
+    const body=document.createElement('div');
+    body.textContent=text;
+    body.style.marginTop=mediaUrl?'6px':'0';
+    bubble.appendChild(body);
+  }
+  if(stamp){
+    const time=document.createElement('span');
+    time.className='chat-time';
+    time.textContent=stamp;
+    bubble.appendChild(time);
+  }
+  chatMessages.appendChild(bubble);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+}
+
+function formatChatTime(iso){
+  try{return new Date(iso).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});}
+  catch{return '';}
+}
+
+function formatBytes(bytes){
+  if(bytes<1024) return bytes+' B';
+  if(bytes<1024*1024) return (bytes/1024).toFixed(1)+' KB';
+  return (bytes/(1024*1024)).toFixed(1)+' MB';
+}
+
+function setChatFile(file){
+  selectedChatFile=file||null;
+  if(!file){
+    chatMediaPreview.classList.remove('show');
+    if(previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+    previewObjectUrl=null;
+    return;
+  }
+  if(previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+  previewObjectUrl=URL.createObjectURL(file);
+
+  chatFileName.textContent=file.name;
+  chatFileMeta.textContent=`${file.type || 'file'} • ${formatBytes(file.size)}`;
+  chatMediaThumb.src=previewObjectUrl;
+  chatMediaThumb.style.display=file.type.startsWith('image/')?'block':'none';
+  if(file.type.startsWith('video/')){
+    chatMediaThumb.style.display='block';
+  }
+  chatMediaPreview.classList.add('show');
+}
+
+function clearChatFile(){
+  setChatFile(null);
+  chatCameraInput.value='';
+  chatGalleryInput.value='';
+}
+
+chatCamera.addEventListener('click',()=>chatCameraInput.click());
+chatGallery.addEventListener('click',()=>chatGalleryInput.click());
+chatCameraInput.addEventListener('change',e=>setChatFile(e.target.files[0]||null));
+chatGalleryInput.addEventListener('change',e=>setChatFile(e.target.files[0]||null));
+chatClearFile.addEventListener('click',clearChatFile);
+
+async function loadChat(){
+  try{
+    const r=await fetch(`${BACKEND_URL}/api/chat/messages?session_id=${encodeURIComponent(sessionId)}`);
+    if(!r.ok) return;
+    const data=await r.json();
+    (data.messages||[]).forEach(m=>{
+      const key=String(m.id||m.time||m.text);
+      if(chatSeen.has(key)) return;
+      chatSeen.add(key);
+      addChatMessage(m.text, m.sender==='visitor', formatChatTime(m.time), m.media_url||'', m.media_type||'');
+    });
+  }catch(e){ console.debug('Chat poll:',e); }
+}
+
+async function sendChat(){
+  if(chatBusy || !chatInput) return;
+  const text=chatInput.value.trim();
+  const file=selectedChatFile;
+  if(!text && !file) return;
+
+  if(!file && text.toLowerCase()==="/game"){
+    addChatMessage(text,true,formatChatTime(new Date().toISOString()));
+    chatInput.value="";
+    startGame();
+    return;
+  }
+
+  chatBusy=true;
+  chatSend.disabled=true;
+  chatInput.disabled=true;
+  chatCamera.disabled=true;
+  chatGallery.disabled=true;
+
+  try{
+    if(file){
+      const form=new FormData();
+      form.append('session_id',sessionId);
+      form.append('text',text);
+      form.append('file',file,file.name);
+
+      const r=await fetch(`${BACKEND_URL}/api/chat/send-media`,{
+        method:'POST',
+        body:form
+      });
+      if(!r.ok) throw new Error('media send failed');
+
+      addChatMessage(text,true,formatChatTime(new Date().toISOString()),
+                     file.type.startsWith('image/')||file.type.startsWith('video/') ? URL.createObjectURL(file) : '',
+                     file.type);
+      clearChatFile();
+    }else{
+      const r=await fetch(`${BACKEND_URL}/api/chat/send`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({session_id:sessionId,text})
+      });
+      if(!r.ok) throw new Error('send failed');
+      addChatMessage(text,true,formatChatTime(new Date().toISOString()));
+    }
+    chatSeen.add('local-'+Date.now());
+    chatInput.value='';
+  }catch(e){
+    toast.textContent='Message/media send nahi hua. Thodi der baad try karna. 🌷';
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),2200);
+  }finally{
+    chatBusy=false;
+    chatSend.disabled=false;
+    chatInput.disabled=false;
+    chatCamera.disabled=false;
+    chatGallery.disabled=false;
+    chatTyping.classList.remove('show');
+    chatInput.focus();
+  }
+}
+
+chatSend.addEventListener('click',sendChat);
+chatInput.addEventListener('keydown',e=>{
+  if(e.key==='Enter' && !e.shiftKey){e.preventDefault();sendChat();}
+});
+setInterval(loadChat,3500);
+loadChat();
+
+
 (function createAtmosphere(){
   const petals=document.getElementById('petals');
   const sparkles=document.getElementById('sparkles');
@@ -377,7 +896,7 @@ function celebrate(){
 
 // A playful but touch-friendly optional “No” behavior for the first question.
 // A real no is never blocked; tapping “No” simply shows a gentle retry message.
-window.addEventListener('load',()=>{ show('s1'); sendEvent('page_opened'); });
+window.addEventListener('load',()=>{ show('s1', false); sendEvent('page_opened','s1',PAGE_LABELS.s1); });
 </script>
 </body>
 </html>
