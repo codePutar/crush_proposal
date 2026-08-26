@@ -87,6 +87,28 @@ async def telegram_send_text(text):
         return payload.get("result")
 
 
+async def telegram_send_game_prompt(session_id, mode, target, prompt, round_no):
+    if not (BOT_TOKEN and CHAT_ID):
+        return None
+    target_label = "HER (website visitor)" if target == "her" else "ME (owner)"
+    text = (
+        f"🎮 Bottle Spin — Round {round_no}\\n\\n"
+        f"Mode: {mode.upper()}\\n"
+        f"Landed on: {target_label}\\n"
+        f"Prompt: {prompt}\\n\\n"
+        f"Session: {session_id}"
+    )
+    return await telegram_send_text(text)
+
+
+async def telegram_send_game_answer(session_id, mode, text):
+    if not (BOT_TOKEN and CHAT_ID):
+        return None
+    return await telegram_send_text(
+        f"🎮 Game reply\\nMode: {mode.upper()}\\nSession: {session_id}\\n\\n{text}"
+    )
+
+
 async def telegram_typing():
     if not (BOT_TOKEN and CHAT_ID):
         return False
@@ -118,6 +140,46 @@ async def broadcast_chat(session_id, message):
 def store_message(session_id, message):
     chat_messages[session_id].append(message)
     return message
+
+
+@app.post("/api/game/prompt")
+async def game_prompt(payload: dict):
+    session_id = str(payload.get("session_id", "")).strip()
+    mode = str(payload.get("mode", "truth")).strip().lower()
+    target = str(payload.get("target", "her")).strip().lower()
+    prompt = str(payload.get("prompt", "")).strip()
+    round_no = int(payload.get("round", 1))
+
+    if not session_id or len(session_id) > 120:
+        raise HTTPException(400, "Invalid session")
+    if mode not in {"truth", "dare"}:
+        raise HTTPException(400, "Invalid game mode")
+    if target not in {"her", "me"}:
+        raise HTTPException(400, "Invalid target")
+    if not prompt or len(prompt) > 1000:
+        raise HTTPException(400, "Invalid prompt")
+
+    active_game_sessions[session_id] = {
+        "mode": mode,
+        "target": target,
+        "prompt": prompt,
+        "round": round_no,
+        "updated": time.time(),
+    }
+
+    try:
+        sent = await telegram_send_game_prompt(
+            session_id, mode, target, prompt, round_no
+        )
+    except Exception as e:
+        print("Telegram game prompt error:", e)
+        sent = None
+
+    return {
+        "ok": True,
+        "telegram_sent": bool(sent),
+        "game": active_game_sessions[session_id],
+    }
 
 
 @app.post("/api/chat/send")

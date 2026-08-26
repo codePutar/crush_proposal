@@ -1378,48 +1378,761 @@
     }
 
 
-    /* Game */
+    /* Clean bottle game UI */
     .game-card {
-      text-align: center
+      text-align: center;
+      overflow: hidden
     }
 
-    .game-status {
-      font-size: 12px;
+    .game-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between
+    }
+
+    .game-round-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff2f5;
+      border: 1px solid #efd7df;
+      color: #9b5067;
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .1em
+    }
+
+    .game-stage {
+      width: 100%;
+      max-width: 430px;
+      margin: 0 auto;
+      padding-top: 10px
+    }
+
+    .game-icon {
+      font-size: 68px;
+      line-height: 1;
+      margin: 6px auto 10px;
+      animation: bottleIdle 2.4s ease-in-out infinite
+    }
+
+    @keyframes bottleIdle {
+
+      0%,
+      100% {
+        transform: rotate(-4deg) translateY(0)
+      }
+
+      50% {
+        transform: rotate(4deg) translateY(-5px)
+      }
+    }
+
+    .stage-eyebrow,
+    .landing-eyebrow {
+      color: #9b5067;
+      font-size: 10px;
+      font-weight: 850;
+      letter-spacing: .16em;
+      text-transform: uppercase
+    }
+
+    .game-title {
+      font-family: Georgia, serif;
+      color: #522838;
+      font-size: clamp(29px, 7vw, 38px);
+      line-height: 1.12;
+      margin: 8px 0
+    }
+
+    .game-subtitle {
+      color: #8a6c76;
+      font-size: 13px;
+      line-height: 1.62;
+      max-width: 350px;
+      margin: 0 auto
+    }
+
+    .person-row {
+      display: grid;
+      grid-template-columns: 1fr 54px 1fr;
+      align-items: center;
+      gap: 8px;
+      margin: 22px 0 13px
+    }
+
+    .person-card {
+      padding: 12px 8px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, .78);
+      border: 1px solid #efd7df;
+      box-shadow: 0 10px 25px rgba(103, 43, 63, .06)
+    }
+
+    .person-avatar {
+      font-size: 38px;
+      line-height: 1
+    }
+
+    .person-name {
+      margin-top: 7px;
+      color: #522838;
+      font-weight: 900;
+      letter-spacing: .1em;
+      font-size: 12px
+    }
+
+    .person-caption {
       color: #9b7e87;
-      margin: 8px auto 16px;
-      line-height: 1.55
+      font-size: 9px;
+      margin-top: 3px
     }
 
-    .game-choice {
+    .vs-circle {
+      width: 42px;
+      height: 42px;
+      display: grid;
+      place-items: center;
+      margin: auto;
+      border-radius: 50%;
+      background: #fff2f5;
+      border: 1px solid #efd7df;
+      color: #9b5067;
+      font-size: 9px;
+      font-weight: 900
+    }
+
+    .bottle-board {
+      position: relative;
+      width: min(330px, 82vw);
+      aspect-ratio: 1;
+      margin: 0 auto 12px;
+      display: grid;
+      place-items: center
+    }
+
+    .board-ring {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none
+    }
+
+    .ring-1 {
+      inset: 4%;
+      border: 1px dashed rgba(200, 90, 119, .25)
+    }
+
+    .ring-2 {
+      inset: 12%;
+      border: 1px solid rgba(200, 90, 119, .11)
+    }
+
+    .bottle-board:before {
+      content: "";
+      position: absolute;
+      inset: 8%;
+      border-radius: 50%;
+      background: radial-gradient(circle, #fff 0%, #fff8fa 45%, #f9e4eb 100%);
+      box-shadow: inset 0 0 50px rgba(200, 90, 119, .07), 0 18px 35px rgba(103, 43, 63, .08)
+    }
+
+    .pointer {
+      position: absolute;
+      top: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 8;
+      color: #8d2b4c;
+      font-size: 19px
+    }
+
+    .bottle-center {
+      position: relative;
+      z-index: 5;
+      width: 105px;
+      height: 105px;
+      display: grid;
+      place-items: center
+    }
+
+    .spin-bottle {
+      font-size: 78px;
+      line-height: 1;
+      transform-origin: 50% 50%;
+      user-select: none;
+      filter: drop-shadow(0 12px 15px rgba(103, 43, 63, .16))
+    }
+
+    .spin-bottle.spinning {
+      animation: bottleSpinProper 2.2s cubic-bezier(.08, .77, .14, 1) forwards
+    }
+
+    @keyframes bottleSpinProper {
+      0% {
+        transform: rotate(0deg) scale(1)
+      }
+
+      14% {
+        transform: rotate(390deg) scale(1.05)
+      }
+
+      39% {
+        transform: rotate(1090deg) scale(1.10)
+      }
+
+      63% {
+        transform: rotate(1500deg) scale(1.04)
+      }
+
+      80% {
+        transform: rotate(1660deg) scale(1.02)
+      }
+
+      92% {
+        transform: rotate(calc(var(--spin-end, 2160deg) - 34deg)) scale(1.01)
+      }
+
+      100% {
+        transform: rotate(var(--spin-end, 2160deg)) scale(1)
+      }
+    }
+
+    .board-seat {
+      position: absolute;
+      z-index: 7;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .9);
+      border: 1px solid #efd7df;
+      color: #80626e;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .1em
+    }
+
+    .seat-you {
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%)
+    }
+
+    .seat-me {
+      bottom: 14px;
+      left: 50%;
+      transform: translateX(-50%)
+    }
+
+    .spin-now-btn,
+    .continue-game-btn,
+    .prompt-btn {
+      max-width: 330px;
+      margin: 4px auto 0
+    }
+
+    .spin-hint {
+      margin-top: 9px;
+      font-size: 10px;
+      color: #a28790
+    }
+
+    .landing-stage {
+      padding-top: 30px;
+      animation: gameStageIn .55s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    @keyframes gameStageIn {
+      from {
+        opacity: 0;
+        transform: translateY(13px) scale(.985)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .landing-orb {
+      font-size: 75px;
+      line-height: 1;
+      margin-bottom: 11px;
+      animation: landingPop .65s cubic-bezier(.2, .85, .25, 1)
+    }
+
+    @keyframes landingPop {
+      0% {
+        opacity: 0;
+        transform: scale(.55)
+      }
+
+      70% {
+        opacity: 1;
+        transform: scale(1.08)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .landing-name {
+      font-family: Georgia, serif;
+      color: #522838;
+      font-size: 34px;
+      margin: 6px 0
+    }
+
+    .landing-sub {
+      color: #8a6c76;
+      font-size: 13px;
+      line-height: 1.55;
+      max-width: 310px;
+      margin: 0 auto 19px
+    }
+
+    .choice-stage {
+      padding-top: 24px
+    }
+
+    .stage-heading {
+      font-family: Georgia, serif;
+      color: #522838;
+      font-size: 31px;
+      margin: 7px 0
+    }
+
+    .td-choice {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 16px
+      gap: 11px;
+      margin: 20px 0 12px
     }
 
-    .game-choice .btn {
-      min-height: 58px
+    .td-card {
+      border: 1px solid #efd7df;
+      background: rgba(255, 255, 255, .82);
+      border-radius: 22px;
+      padding: 17px 10px;
+      cursor: pointer;
+      color: #5d3d49;
+      min-height: 120px
     }
 
-    .game-result {
-      min-height: 56px;
-      margin-top: 16px;
-      padding: 13px;
-      border-radius: 18px;
-      background: #fff6f8;
-      border: 1px solid #f0d8df;
-      color: #6d4351;
-      font-size: 13px;
+    .td-card.selected {
+      border-color: #c85a77;
+      background: #fff7f9;
+      box-shadow: 0 0 0 3px rgba(200, 90, 119, .1), 0 12px 25px rgba(103, 43, 63, .08)
+    }
+
+    .td-icon {
+      display: block;
+      font-size: 31px;
+      margin-bottom: 5px
+    }
+
+    .td-card strong {
+      display: block;
+      font-size: 14px
+    }
+
+    .td-card span:last-child {
+      font-size: 10px;
+      color: #9b7e87
+    }
+
+    .prompt-stage {
+      padding-top: 24px
+    }
+
+    .prompt-type-badge {
+      display: inline-flex;
+      padding: 7px 11px;
+      border-radius: 999px;
+      background: #fff2f5;
+      border: 1px solid #efd7df;
+      color: #9b5067;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .12em
+    }
+
+    .prompt-big {
+      font-family: Georgia, serif;
+      color: #522838;
+      font-size: clamp(25px, 7vw, 32px);
+      line-height: 1.28;
+      max-width: 370px;
+      margin: 15px auto 9px;
+      animation: gameStageIn .45s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    .prompt-caption {
+      color: #947782;
+      font-size: 11px;
       line-height: 1.5
     }
 
-    .back-start {
-      width: auto;
-      min-height: 38px;
-      padding: 0 14px;
-      font-size: 11px;
-      margin: 12px auto 0;
-      letter-spacing: .02em
+    .prompt-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 20px
+    }
+
+    .custom-box {
+      display: flex;
+      gap: 8px;
+      max-width: 380px;
+      margin: 10px auto 0
+    }
+
+    .next-round-btn {
+      max-width: 330px;
+      margin: 13px auto 0
+    }
+
+    .owner-stage {
+      padding-top: 22px
+    }
+
+    .game-chat {
+      margin-top: 18px;
+      text-align: left;
+      border: 1px solid rgba(200, 90, 119, .14);
+      background: rgba(255, 255, 255, .63);
+      border-radius: 22px;
+      padding: 13px;
+      box-shadow: 0 12px 28px rgba(103, 43, 63, .07)
+    }
+
+    .game-chat-messages {
+      height: 190px
+    }
+
+    .game-footer {
+      margin-top: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px
+    }
+
+    .game-footer .game-status {
+      margin: 0;
+      text-align: left
+    }
+
+    .game-footer .back-start {
+      margin: 0
+    }
+
+    @media(max-width:430px) {
+      .person-row {
+        grid-template-columns: 1fr 42px 1fr
+      }
+
+      .person-avatar {
+        font-size: 32px
+      }
+
+      .game-title {
+        font-size: 29px
+      }
+
+      .prompt-actions {
+        grid-template-columns: 1fr
+      }
+    }
+
+    /* NEXT LEVEL GAME LAYER */
+    .game-card {
+      position: relative;
+      isolation: isolate;
+      background: radial-gradient(circle at 50% 10%, rgba(255, 255, 255, .98), rgba(255, 255, 255, .68) 38%, rgba(255, 241, 245, .64) 100%)
+    }
+
+    .game-card:before {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      left: 50%;
+      top: 90px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200, 90, 119, .13), transparent 68%);
+      filter: blur(14px);
+      z-index: -1;
+      pointer-events: none
+    }
+
+    .game-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      margin: 2px 0 8px
+    }
+
+    .hud-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      min-height: 28px;
+      padding: 6px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .72);
+      border: 1px solid rgba(255, 255, 255, .96);
+      box-shadow: 0 7px 18px rgba(103, 43, 63, .05);
+      color: #96727e;
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      backdrop-filter: blur(10px)
+    }
+
+    .hud-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #c85a77;
+      box-shadow: 0 0 0 4px rgba(200, 90, 119, .10);
+      animation: hudPulse 1.8s ease-in-out infinite
+    }
+
+    .hud-heart {
+      color: #c85a77;
+      animation: heartbeat 1.65s ease-in-out infinite
+    }
+
+    @keyframes hudPulse {
+      50% {
+        transform: scale(1.35);
+        opacity: .72
+      }
+    }
+
+    @keyframes heartbeat {
+
+      0%,
+      100% {
+        transform: scale(1)
+      }
+
+      8% {
+        transform: scale(1.28)
+      }
+
+      16% {
+        transform: scale(1)
+      }
+
+      24% {
+        transform: scale(1.18)
+      }
+
+      32% {
+        transform: scale(1)
+      }
+    }
+
+    .suspense-count {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      display: grid;
+      place-items: center;
+      pointer-events: none;
+      font-family: Georgia, serif;
+      font-size: clamp(90px, 24vw, 180px);
+      color: #7e2745;
+      text-shadow: 0 18px 50px rgba(126, 39, 69, .20);
+      background: rgba(255, 249, 250, .18);
+      backdrop-filter: blur(2px);
+      animation: suspensePop .5s cubic-bezier(.2, .85, .25, 1)
+    }
+
+    .suspense-count.show {
+      display: grid
+    }
+
+    @keyframes suspensePop {
+      0% {
+        opacity: 0;
+        transform: scale(.5)
+      }
+
+      35% {
+        opacity: 1;
+        transform: scale(1.08)
+      }
+
+      100% {
+        opacity: 0;
+        transform: scale(1)
+      }
+    }
+
+    .spin-now-btn {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate
+    }
+
+    .spin-now-btn:after {
+      content: "";
+      position: absolute;
+      inset: -20% auto -20% -35%;
+      width: 30%;
+      transform: skewX(-18deg) translateX(-160%);
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .42), transparent);
+      animation: buttonShine 2.8s ease-in-out infinite;
+      z-index: -1
+    }
+
+    @keyframes buttonShine {
+
+      20%,
+      100% {
+        transform: skewX(-18deg) translateX(520%)
+      }
+    }
+
+    .spin-now-btn.spinning-btn {
+      animation: spinButtonPulse .5s ease
+    }
+
+    @keyframes spinButtonPulse {
+      50% {
+        transform: scale(.96)
+      }
+    }
+
+    .bottle-board.spinning-board .ring-1 {
+      animation: ringSpin 2.25s linear
+    }
+
+    .bottle-board.spinning-board .ring-2 {
+      animation: ringSpinReverse 2.25s linear
+    }
+
+    .bottle-board.spinning-board:before {
+      animation: boardBreath 2.25s ease
+    }
+
+    @keyframes ringSpin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes ringSpinReverse {
+      to {
+        transform: rotate(-360deg)
+      }
+    }
+
+    @keyframes boardBreath {
+      25% {
+        transform: scale(1.035);
+        box-shadow: inset 0 0 58px rgba(200, 90, 119, .13), 0 22px 48px rgba(103, 43, 63, .12)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .landing-stage {
+      position: relative
+    }
+
+    .landing-reaction {
+      display: inline-flex;
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: #fff2f5;
+      border: 1px solid #efd7df;
+      color: #9b5067;
+      font-size: 10px;
+      font-weight: 800;
+      margin: 4px auto 15px;
+      animation: reactionFloat 2.1s ease-in-out infinite
+    }
+
+    @keyframes reactionFloat {
+      50% {
+        transform: translateY(-3px)
+      }
+    }
+
+    .td-card {
+      position: relative;
+      overflow: hidden
+    }
+
+    .td-card:after {
+      content: "";
+      position: absolute;
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      right: -28px;
+      bottom: -32px;
+      background: radial-gradient(circle, rgba(200, 90, 119, .11), transparent 70%);
+      pointer-events: none
+    }
+
+    .td-card.selected .td-icon {
+      animation: selectedPop .55s cubic-bezier(.2, .85, .25, 1)
+    }
+
+    @keyframes selectedPop {
+      40% {
+        transform: scale(1.22) rotate(-4deg)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    .prompt-stage {
+      position: relative
+    }
+
+    .prompt-stage:before {
+      content: "";
+      position: absolute;
+      inset: 25px 12% auto;
+      height: 100px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200, 90, 119, .12), transparent 70%);
+      filter: blur(12px);
+      pointer-events: none;
+      z-index: -1
+    }
+
+    .prompt-big {
+      min-height: 115px;
+      display: grid;
+      place-items: center
+    }
+
+    .game-chat {
+      animation: chatReveal .45s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    @keyframes chatReveal {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
     }
 
     .time-collage {
@@ -1685,6 +2398,403 @@
         transform: none
       }
     }
+
+    /* === Premium game polish v2 === */
+    .game-card {
+      position: relative;
+      background:
+        radial-gradient(circle at 50% 8%, rgba(255, 255, 255, .95), rgba(255, 249, 250, .78) 42%, rgba(253, 238, 243, .70) 100%);
+      border: 1px solid rgba(255, 255, 255, .95);
+    }
+
+    .game-card::before {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(135deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, 0) 38%, rgba(200, 90, 119, .10));
+      opacity: .8;
+    }
+
+    .game-top,
+    .game-stage,
+    .game-footer {
+      position: relative;
+      z-index: 2
+    }
+
+    .game-top {
+      padding-bottom: 4px
+    }
+
+    .game-round-pill {
+      box-shadow: 0 6px 18px rgba(126, 39, 69, .08);
+      backdrop-filter: blur(8px)
+    }
+
+    .person-row {
+      position: relative;
+      gap: 14px;
+      margin-top: 25px
+    }
+
+    .person-row::after {
+      content: "";
+      position: absolute;
+      left: 16%;
+      right: 16%;
+      bottom: -10px;
+      height: 34px;
+      background: radial-gradient(ellipse, rgba(200, 90, 119, .15), transparent 70%);
+      filter: blur(7px);
+      z-index: -1
+    }
+
+    .person-card {
+      position: relative;
+      overflow: hidden;
+      transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+      background: linear-gradient(180deg, rgba(255, 255, 255, .92), rgba(255, 247, 249, .80))
+    }
+
+    .person-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(125deg, rgba(255, 255, 255, .7), transparent 45%);
+      pointer-events: none
+    }
+
+    .person-card:hover {
+      transform: translateY(-3px)
+    }
+
+    .person-avatar {
+      filter: drop-shadow(0 7px 9px rgba(103, 43, 63, .12))
+    }
+
+    .vs-circle {
+      box-shadow: 0 6px 20px rgba(126, 39, 69, .10)
+    }
+
+    .bottle-board {
+      margin-top: 7px
+    }
+
+    .bottle-board::after {
+      content: "";
+      position: absolute;
+      inset: 18%;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, .1), transparent 60%);
+      pointer-events: none;
+      z-index: 1
+    }
+
+    .board-ring.ring-1 {
+      animation: ringPulse 2.8s ease-in-out infinite
+    }
+
+    .board-ring.ring-2 {
+      animation: ringPulse 2.8s ease-in-out .45s infinite
+    }
+
+    @keyframes ringPulse {
+
+      0%,
+      100% {
+        transform: scale(.98);
+        opacity: .55
+      }
+
+      50% {
+        transform: scale(1.03);
+        opacity: 1
+      }
+    }
+
+    .spin-bottle {
+      filter: drop-shadow(0 15px 16px rgba(103, 43, 63, .20));
+    }
+
+    .spin-bottle.spinning {
+      animation: bottleSpinProper 2.4s cubic-bezier(.08, .77, .14, 1) forwards
+    }
+
+    .spin-now-btn {
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 30px rgba(141, 43, 76, .20) !important
+    }
+
+    .spin-now-btn::after {
+      content: "";
+      position: absolute;
+      top: -120%;
+      left: -35%;
+      width: 35%;
+      height: 340%;
+      transform: rotate(24deg);
+      background: rgba(255, 255, 255, .28);
+      animation: buttonShine 3.8s ease-in-out infinite
+    }
+
+    @keyframes buttonShine {
+
+      0%,
+      62% {
+        left: -45%
+      }
+
+      78%,
+      100% {
+        left: 130%
+      }
+    }
+
+    .spin-hint {
+      animation: hintPulse 2.2s ease-in-out infinite
+    }
+
+    @keyframes hintPulse {
+
+      0%,
+      100% {
+        opacity: .65
+      }
+
+      50% {
+        opacity: 1
+      }
+    }
+
+    .landing-stage {
+      position: relative;
+      min-height: 330px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center
+    }
+
+    .landing-stage::before {
+      content: "";
+      position: absolute;
+      width: 250px;
+      height: 250px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(200, 90, 119, .16), transparent 68%);
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%);
+      filter: blur(2px)
+    }
+
+    .landing-orb {
+      position: relative;
+      z-index: 1;
+      filter: drop-shadow(0 18px 24px rgba(103, 43, 63, .16));
+      animation: landingFloat 2.1s ease-in-out infinite
+    }
+
+    @keyframes landingFloat {
+
+      0%,
+      100% {
+        transform: translateY(0) rotate(-3deg)
+      }
+
+      50% {
+        transform: translateY(-8px) rotate(3deg)
+      }
+    }
+
+    .landing-name {
+      position: relative;
+      z-index: 1;
+      font-size: 38px;
+      text-shadow: 0 10px 24px rgba(126, 39, 69, .10)
+    }
+
+    .landing-sub {
+      position: relative;
+      z-index: 1
+    }
+
+    .continue-game-btn {
+      position: relative;
+      z-index: 1;
+      box-shadow: 0 15px 28px rgba(141, 43, 76, .17) !important
+    }
+
+    .choice-stage,
+    .prompt-stage,
+    .owner-stage {
+      animation: stageLift .48s cubic-bezier(.22, 1, .36, 1)
+    }
+
+    @keyframes stageLift {
+      from {
+        opacity: 0;
+        transform: translateY(12px) scale(.985)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .td-card {
+      position: relative;
+      overflow: hidden
+    }
+
+    .td-card::before {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background: radial-gradient(circle, rgba(200, 90, 119, .10), transparent 52%);
+      opacity: 0;
+      transition: opacity .25s
+    }
+
+    .td-card.selected::before {
+      opacity: 1
+    }
+
+    .td-card.selected .td-icon {
+      animation: tdBounce 1.6s ease-in-out infinite
+    }
+
+    @keyframes tdBounce {
+
+      0%,
+      100% {
+        transform: translateY(0)
+      }
+
+      50% {
+        transform: translateY(-4px) scale(1.04)
+      }
+    }
+
+    .prompt-stage {
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center
+    }
+
+    .prompt-type-badge {
+      box-shadow: 0 8px 20px rgba(126, 39, 69, .08)
+    }
+
+    .prompt-big {
+      font-size: clamp(27px, 7.3vw, 35px);
+      text-shadow: 0 10px 22px rgba(126, 39, 69, .08)
+    }
+
+    .prompt-actions .btn {
+      box-shadow: 0 10px 20px rgba(103, 43, 63, .07)
+    }
+
+    .next-round-btn {
+      opacity: .9
+    }
+
+    .game-chat {
+      animation: chatSlide .45s ease both
+    }
+
+    @keyframes chatSlide {
+      from {
+        opacity: 0;
+        transform: translateY(10px)
+      }
+
+      to {
+        opacity: 1;
+        transform: none
+      }
+    }
+
+    .game-footer {
+      border-top: 1px solid rgba(200, 90, 119, .08);
+      padding-top: 12px;
+      margin-top: 18px
+    }
+
+    .game-footer .back-start {
+      background: rgba(255, 255, 255, .58) !important
+    }
+
+    .game-winner-burst {
+      position: fixed;
+      inset: 0;
+      z-index: 120;
+      pointer-events: none;
+      overflow: hidden
+    }
+
+    .game-burst-heart {
+      position: absolute;
+      left: 50%;
+      top: 48%;
+      font-size: 24px;
+      opacity: 0;
+      animation: burstHeart 1.4s cubic-bezier(.17, .67, .37, 1) forwards
+    }
+
+    @keyframes burstHeart {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(.35)
+      }
+
+      15% {
+        opacity: 1
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)) scale(1.2)
+      }
+    }
+
+    .spin-now-btn.spinning-btn {
+      animation: spinBtnPulse .42s ease
+    }
+
+    @keyframes spinBtnPulse {
+      50% {
+        transform: scale(.96)
+      }
+
+      100% {
+        transform: scale(1)
+      }
+    }
+
+    @media(max-width:430px) {
+      .person-row {
+        gap: 8px
+      }
+
+      .person-card {
+        padding: 10px 6px
+      }
+
+      .landing-stage {
+        min-height: 300px
+      }
+
+      .landing-name {
+        font-size: 34px
+      }
+    }
   </style>
 </head>
 
@@ -1885,18 +2995,110 @@
 
       <section class="screen" id="game">
         <div class="card game-card" style="flex:1">
-          <div class="eyebrow">mini game • secret mode</div>
-          <div class="heart">🎮</div>
-          <h1 style="font-size:34px">Pick one…<span class="soft">let's see what you choose 👀</span></h1>
-          <p class="lead">Koi timer nahi, koi pressure nahi. Bas ek cute little game. ❤️</p>
-          <div class="game-status" id="gameStatus">Question 1 • 3 rounds</div>
-          <div class="game-question" id="gameQuestion">Perfect plan?</div>
-          <div class="game-result" id="gameResult">Ready? Choose your answer below. 🌷</div>
-          <div class="game-choice" id="gameChoices">
-            <button class="btn primary" data-choice="A">Coffee date ☕</button>
-            <button class="btn secondary" data-choice="B">Long walk 🌆</button>
+          <div class="game-top">
+            <div class="eyebrow">secret game</div>
+            <div class="game-round-pill" id="gameRoundPill">ROUND 1</div>
           </div>
-          <button class="btn ghost back-start" type="button" onclick="exitGame()">Exit game</button>
+          <div class="game-stage">
+            <div class="game-hud">
+              <div class="hud-item"><span class="hud-dot"></span><span id="gameTurnLabel">YOUR TURN</span></div>
+              <div class="hud-item"><span class="hud-heart">♥</span><span id="gameMoodLabel">just a little game</span>
+              </div>
+            </div>
+            <div class="suspense-count hidden" id="suspenseCount"></div>
+            <div id="gameIntroStage">
+              <div class="game-icon">🍾</div>
+              <div class="stage-eyebrow">spin the bottle</div>
+              <h1 class="game-title">Let's see where it stops…</h1>
+              <p class="game-subtitle">Bottle tum dono ke beech spin hogi. Jis par rukegi, uski turn. 👀</p>
+              <div class="person-row">
+                <div class="person-card">
+                  <div class="person-avatar">👩🏻</div>
+                  <div class="person-name">YOU</div>
+                  <div class="person-caption">ready? 💗</div>
+                </div>
+                <div class="vs-circle">VS</div>
+                <div class="person-card">
+                  <div class="person-avatar">🧑🏻</div>
+                  <div class="person-name">ME</div>
+                  <div class="person-caption">let's see 😳</div>
+                </div>
+              </div>
+              <div class="bottle-board" id="bottleBoard">
+                <div class="board-ring ring-1"></div>
+                <div class="board-ring ring-2"></div>
+                <div class="pointer">▼</div>
+                <div class="bottle-center">
+                  <div class="spin-bottle" id="spinBottle">🍾</div>
+                </div>
+                <div class="board-seat seat-you">YOU</div>
+                <div class="board-seat seat-me">ME</div>
+              </div>
+              <button class="btn primary spin-now-btn" id="spinNowBtn" type="button">🍾 Spin the bottle</button>
+              <div class="spin-hint" id="spinHint">Tap once. Bottle ko khud stop hone do.</div>
+            </div>
+            <div class="landing-stage hidden" id="landingStage">
+              <div class="landing-orb">🍾</div>
+              <div class="landing-eyebrow">the bottle stopped on</div>
+              <div class="landing-name" id="landingName">YOU 💗</div>
+              <div class="landing-sub" id="landingSub">Your turn 👀</div>
+              <div class="landing-reaction" id="landingReaction">👀 lucky you</div>
+              <button class="btn primary continue-game-btn" id="continueGameBtn" type="button">Continue →</button>
+            </div>
+            <div class="choice-stage hidden" id="choiceStage">
+              <div class="stage-eyebrow">your turn</div>
+              <h2 class="stage-heading">Truth or Dare?</h2>
+              <p class="game-subtitle">Truth is selected by default. Jo prompt milega, woh Ashutosh ki side se hoga. 💗
+              </p>
+              <div class="td-choice">
+                <button class="td-card selected" type="button" data-mode="truth"><span
+                    class="td-icon">💗</span><strong>TRUTH</strong><span>Tell me honestly 👀</span></button>
+                <button class="td-card" type="button" data-mode="dare"><span
+                    class="td-icon">🔥</span><strong>DARE</strong><span>Do it if you dare 😈</span></button>
+              </div>
+              <button class="btn primary prompt-btn" id="getPromptBtn" type="button">Give me a prompt →</button>
+            </div>
+            <div class="prompt-stage hidden" id="promptStage">
+              <div class="prompt-type-badge" id="gamePromptType">TRUTH</div>
+              <div class="prompt-big" id="gameQuestion">Your prompt appears here.</div>
+              <div class="prompt-caption" id="gamePromptCaption">Answer honestly. No pressure. 🌷</div>
+              <div class="prompt-actions"><button class="btn primary" id="answerPromptBtn" type="button">💬
+                  Answer</button><button class="btn secondary" id="customPromptBtn" type="button">✍️ Custom</button>
+              </div>
+              <div class="custom-box hidden" id="gameCustomPromptRow"><input id="gameCustomPromptInput"
+                  class="chat-input" maxlength="500" placeholder="Apna custom truth/dare…" autocomplete="off" /><button
+                  class="chat-send" id="sendGameCustomBtn" type="button">➤</button></div>
+              <button class="btn ghost next-round-btn" id="nextSpinBtn" type="button">🍾 Next round</button>
+            </div>
+            <div class="owner-stage hidden" id="ownerStage">
+              <div class="landing-orb">😳</div>
+              <div class="landing-eyebrow">it landed on me</div>
+              <div class="landing-name">YOUR TURN</div>
+              <div class="landing-sub">Ab mujhe apna Truth question ya Dare do.</div>
+              <div class="custom-box owner-custom-box"><input id="gameMeCustomInput" class="chat-input" maxlength="500"
+                  placeholder="Mujhe kuch pucho…" autocomplete="off" /><button class="chat-send"
+                  id="sendGameMeCustomBtn" type="button">➤</button></div>
+              <button class="btn ghost next-round-btn" id="ownerNextRoundBtn" type="button">🍾 Spin again</button>
+            </div>
+            <div class="game-chat hidden" id="gameBotChat">
+              <div class="chat-head">
+                <div>
+                  <div class="chat-title">Game chat 💬</div>
+                  <div class="chat-status">live • replies appear here</div>
+                </div><span class="tap-heart">♡</span>
+              </div>
+              <div class="chat-messages game-chat-messages" id="gameChatMessages">
+                <div class="chat-empty" id="gameChatEmpty">Answer yahan bhejo. Mera reply bhi isi game ke andar aa
+                  jayega. ❤️</div>
+              </div>
+              <div class="chat-typing" id="gameChatTyping">Ashutosh is typing… ✨</div>
+              <div class="chat-compose"><input id="gameChatInput" class="chat-input" maxlength="800"
+                  placeholder="Apna reply likho…" autocomplete="off" /><button class="chat-send" id="gameChatSend"
+                  type="button">➤</button></div>
+            </div>
+          </div>
+          <div class="game-footer"><span class="game-status" id="gameStatus">Round 1 • Ready</span><button
+              class="btn ghost back-start" type="button" onclick="exitGame()">Exit</button></div>
         </div>
       </section>
 
@@ -2049,128 +3251,92 @@
       setTimeout(() => layer.innerHTML = '', 2600);
     }
 
-    /* Secret game — only launched by typing /game in chat. No timer. */
-    const gameRounds = [
-      { q: "Perfect plan?", a: "Coffee date ☕", b: "Long walk 🌆", aEmoji: "☕", bEmoji: "🌆" },
-      { q: "Cutest vibe?", a: "Random jokes 😂", b: "Deep talks 🌙", aEmoji: "😂", bEmoji: "🌙" },
-      { q: "One little yes?", a: "Maybe 👀", b: "Definitely ❤️", aEmoji: "👀", bEmoji: "❤️" }
+    /* Staged Truth-or-Dare bottle game */
+    // These are YOUR prompts. Only these prompts can be shown when the bottle lands on her.
+    // Add/edit these whenever you want without changing the game flow.
+    const OWNER_TRUTH_PROMPTS = [
+      "What was the first thing you noticed about me? 👀",
+      "Be completely honest — do you actually like talking to me?",
+      "What's one thing about me that you secretly find cute?",
+      "Have you ever smiled after seeing my message? 🥹",
+      "Have you ever checked my Instagram just because you were curious? 👀",
+      "Would you ever go on a proper date with me?",
+      "What's your honest first impression of me?",
+      "What's something you wanted to tell me but never did?",
+      "Have you ever imagined us hanging out alone?",
+      "What's one question you've always wanted to ask me?",
+      "What do you actually feel when you see my name pop up?",
+      "If I asked you to meet me sometime, would you say yes?",
+      "Describe what you think our vibe is in three words.",
+      "What's one thing you think I misunderstand about you?"
     ];
-    let gameRound = 0;
-    let gameScore = 0;
-    let gameLocked = false;
 
-    function startGame() {
-      gameRound = 0; gameScore = 0; gameLocked = false;
-      show('game');
-      renderGameRound(true);
-      sendEvent('game_started', 'game', 'Opened from the chat game button');
-    }
-
-    function renderGameRound(first = false) {
-      const round = gameRounds[gameRound];
-      const status = document.getElementById('gameStatus');
-      const question = document.getElementById('gameQuestion');
-      const result = document.getElementById('gameResult');
-      const a = document.querySelector('[data-choice="A"]');
-      const b = document.querySelector('[data-choice="B"]');
-      status.textContent = `Question ${gameRound + 1} • ${gameRounds.length} rounds`;
-      if (question) {
-        question.classList.remove('swap');
-        question.textContent = round.q;
-        if (!first) { void question.offsetWidth; question.classList.add('swap'); }
-      }
-      a.textContent = round.a;
-      b.textContent = round.b;
-      a.disabled = false; b.disabled = false;
-      a.classList.remove('choice-hit', 'choice-dim');
-      b.classList.remove('choice-hit', 'choice-dim');
-      result.textContent = 'Choose one — no right or wrong answer. 🌷';
-    }
-
-    function gameFinishAnimation(emoji) {
-      const wrap = document.createElement('div');
-      wrap.className = 'game-finish';
-      const core = document.createElement('div');
-      core.className = 'game-finish-core';
-      core.textContent = emoji;
-      wrap.appendChild(core);
-      ['✨', '🌸', '💗', '✦', '🌷', '♡', '💖', '❀'].forEach((symbol, i) => {
-        const e = document.createElement('div');
-        e.className = 'game-spark';
-        e.textContent = symbol;
-        e.style.setProperty('--dx', `${Math.cos(i / 8 * Math.PI * 2) * 150}px`);
-        e.style.setProperty('--dy', `${Math.sin(i / 8 * Math.PI * 2) * 180}px`);
-        e.style.setProperty('--rot', `${i * 45 - 180}deg`);
-        e.style.animationDelay = `${i * 0.025}s`;
-        wrap.appendChild(e);
-      });
-      document.body.appendChild(wrap);
-      setTimeout(() => wrap.remove(), 1500);
-    }
-
-    function returnToChatFromGame() {
-      const overlay = document.createElement('div');
-      overlay.className = 'chat-return-overlay';
-      overlay.innerHTML = '<div class="chat-return-heart">💬❤️</div>';
-      document.body.appendChild(overlay);
-      void overlay.offsetWidth;
-      overlay.classList.add('show');
-      setTimeout(() => {
-        show('s6');
-        const chatPanel = document.querySelector('#s6 .chat-panel');
-        if (chatPanel) {
-          chatPanel.classList.remove('chat-return-enter');
-          void chatPanel.offsetWidth;
-          chatPanel.classList.add('chat-return-enter');
-          setTimeout(() => chatPanel.classList.remove('chat-return-enter'), 700);
-        }
-      }, 420);
-      setTimeout(() => overlay.remove(), 950);
-    }
-
-    function chooseGame(choice) {
-      if (gameLocked) return;
-      gameLocked = true;
-
-      const roundIndex = gameRound;
-      const round = gameRounds[roundIndex];
-      const answer = choice === 'A' ? round.a : round.b;
-      const picked = document.querySelector(`[data-choice="${choice}"]`);
-      const other = document.querySelector(`[data-choice="${choice === 'A' ? 'B' : 'A'}"]`);
-      const emoji = choice === 'A' ? round.aEmoji : round.bEmoji;
-
-      picked.classList.add('choice-hit');
-      other.classList.add('choice-dim');
-      gameScore += choice === 'A' ? 1 : 0;
-      sendEvent('game_choice', 'game', `Question ${roundIndex + 1}/${gameRounds.length}: ${round.q}
-Selected answer: ${answer}`);
-
-      if (gameRound < gameRounds.length - 1) {
-        document.getElementById('gameResult').textContent =
-          choice === 'A' ? `${emoji} Nice choice! Next one…` : `${emoji} Okayyy… next one 👀`;
-        setTimeout(() => {
-          gameRound++;
-          gameLocked = false;
-          renderGameRound();
-        }, 520);
-      } else {
-        document.getElementById('gameStatus').textContent = 'Game complete ✨';
-        document.getElementById('gameResult').textContent =
-          gameScore >= 2 ? 'Okayyy… I knew you had good taste. 🥹❤️' :
-            'Cute choices. I’m counting that as a win anyway. 🌷';
-        document.querySelectorAll('#gameChoices .btn').forEach(b => b.disabled = true);
-        gameFinishAnimation(gameScore >= 2 ? '🥹❤️' : '🌷✨');
-        setTimeout(() => returnToChatFromGame(), 950);
-      }
-    }
-
-    document.querySelectorAll('#gameChoices .btn').forEach(btn => {
-      btn.addEventListener('click', () => chooseGame(btn.dataset.choice));
-    });
-
+    const OWNER_DARE_PROMPTS = [
+      "Send me a voice note saying the first thing that comes to your mind about me. 🎙️",
+      "Give me a nickname right now. No overthinking. 😂",
+      "Send one emoji that describes your current vibe with me.",
+      "Send me a message starting with: 'Tiny confession…' 👀",
+      "Open my Instagram and tell me which picture you like most.",
+      "Ask me one bold question you've been avoiding.",
+      "Give me a dare back. 🔥",
+      "Send me your most chaotic compliment.",
+      "Tell me one thing you think I should improve.",
+      "Say 'okay, your turn' in your most dramatic voice. 😂"
+    ];
+    // Truth remains the default every round.
+    const truthPrompts = OWNER_TRUTH_PROMPTS;
+    const darePrompts = OWNER_DARE_PROMPTS;
+    let selectedGameMode = 'truth', gameRound = 1, gameLocked = false, gameQuestionTarget = 'her', lastGamePrompt = null;
+    const gameIntroStage = document.getElementById('gameIntroStage'), landingStage = document.getElementById('landingStage'), choiceStage = document.getElementById('choiceStage'), promptStage = document.getElementById('promptStage'), ownerStage = document.getElementById('ownerStage'), gameBotChat = document.getElementById('gameBotChat'), spinBottleEl = document.getElementById('spinBottle'), gameRoundPill = document.getElementById('gameRoundPill'), gameStatusEl = document.getElementById('gameStatus'), landingNameEl = document.getElementById('landingName'), landingSubEl = document.getElementById('landingSub'), spinHintEl = document.getElementById('spinHint'), gameQuestionEl = document.getElementById('gameQuestion'), gamePromptTypeEl = document.getElementById('gamePromptType'), gamePromptCaptionEl = document.getElementById('gamePromptCaption'), gameChatMessagesEl = document.getElementById('gameChatMessages'), gameChatEmptyEl = document.getElementById('gameChatEmpty'), gameChatTypingEl = document.getElementById('gameChatTyping'), gameChatInputEl = document.getElementById('gameChatInput');
+    const gameRandom = a => a[Math.floor(Math.random() * a.length)];
+    function hideGameStages() { [gameIntroStage, landingStage, choiceStage, promptStage, ownerStage, gameBotChat].forEach(e => e?.classList.add('hidden')); }
+    function openGameStage(stage) { hideGameStages(); stage?.classList.remove('hidden'); }
+    function setGameMode(mode) { selectedGameMode = mode === 'dare' ? 'dare' : 'truth'; document.querySelectorAll('.td-card').forEach(b => b.classList.toggle('selected', b.dataset.mode === selectedGameMode)); const m = document.getElementById('gameMoodLabel'); if (m) m.textContent = selectedGameMode === 'truth' ? 'be honest' : 'be brave'; }
+    function startGame() { gameRound = 1; selectedGameMode = 'truth'; gameLocked = false; gameQuestionTarget = 'her'; lastGamePrompt = null; gameRoundPill.textContent = 'ROUND 1'; gameStatusEl.textContent = 'Round 1 • Ready'; spinHintEl.textContent = 'Tap once. Bottle ko khud stop hone do.'; spinBottleEl.classList.remove('spinning'); spinBottleEl.style.transform = 'rotate(0deg)'; spinBottleEl.style.setProperty('--spin-end', '2160deg'); document.getElementById('gameTurnLabel').textContent = 'YOUR TURN'; document.getElementById('gameMoodLabel').textContent = 'just a little game'; openGameStage(gameIntroStage); show('game'); sendEvent('game_started', 'game', 'Staged bottle game opened'); }
+    document.getElementById('spinNowBtn')?.addEventListener('click', () => { const b = document.getElementById('spinNowBtn'); b?.classList.remove('spinning-btn'); void b?.offsetWidth; b?.classList.add('spinning-btn'); spinBottleGame(); });
+    let gameAudioCtx = null;
+    function gameTone(freq, duration = .08, type = 'sine', gain = .028) { try { gameAudioCtx = gameAudioCtx || new (window.AudioContext || window.webkitAudioContext)(); const o = gameAudioCtx.createOscillator(), g = gameAudioCtx.createGain(); o.type = type; o.frequency.value = freq; o.connect(g); g.connect(gameAudioCtx.destination); const t = gameAudioCtx.currentTime; g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + duration); o.start(t); o.stop(t + duration + .02) } catch { } }
+    function suspenseNumber(n, done) { const el = document.getElementById('suspenseCount'); if (!el) { done?.(); return } el.textContent = n; el.classList.remove('hidden', 'show'); void el.offsetWidth; el.classList.add('show'); gameTone(n === '1' ? 520 : 420, .09, 'triangle', .028); setTimeout(() => { el.classList.add('hidden'); el.classList.remove('show'); done?.() }, 420) }
+    function spinBottleGame() { if (gameLocked) return; gameLocked = true; gameQuestionTarget = Math.random() < 0.75 ? 'her' : 'me'; const board = document.getElementById('bottleBoard'), btn = document.getElementById('spinNowBtn'); board?.classList.add('spinning-board'); btn?.classList.add('spinning-btn'); gameStatusEl.textContent = `Round ${gameRound} • Get ready`; spinHintEl.textContent = '3… 2… 1…'; suspenseNumber('3', () => suspenseNumber('2', () => suspenseNumber('1', () => { gameStatusEl.textContent = `Round ${gameRound} • Spinning…`; spinHintEl.textContent = 'Don’t touch it… let it stop 👀'; spinBottleEl.style.setProperty('--spin-end', gameQuestionTarget === 'her' ? '2160deg' : '2340deg'); spinBottleEl.classList.remove('spinning'); void spinBottleEl.offsetWidth; spinBottleEl.classList.add('spinning'); sendEvent('game_spin', 'game', `Round ${gameRound} • bottle landed on ${gameQuestionTarget === 'her' ? 'YOU' : 'ME'}`); gameTone(660, .08, 'sine', .028); setTimeout(() => { gameLocked = false; board?.classList.remove('spinning-board'); btn?.classList.remove('spinning-btn'); showBottleResult(); gameTone(gameQuestionTarget === 'her' ? 740 : 520, .18, 'sine', .045) }, 2250) }))) }
+    function gameWinnerBurst(target) { const w = document.createElement('div'); w.className = 'game-winner-burst'; const s = ['💗', '✨', '🌸', '♡', '💖', '✦', '🌷', '❀']; s.forEach((x, i) => { const e = document.createElement('div'); e.className = 'game-burst-heart'; e.textContent = x; e.style.setProperty('--dx', `${Math.cos(i / s.length * Math.PI * 2) * 170}px`); e.style.setProperty('--dy', `${Math.sin(i / s.length * Math.PI * 2) * 210}px`); e.style.setProperty('--rot', `${i * 55 - 140}deg`); e.style.animationDelay = `${i * 0.04}s`; w.appendChild(e) }); document.body.appendChild(w); setTimeout(() => w.remove(), 1700); }
+    function showBottleResult() { openGameStage(landingStage); gameWinnerBurst(gameQuestionTarget); const reaction = document.getElementById('landingReaction'); gameStatusEl.textContent = `Round ${gameRound} • Bottle stopped`; if (gameQuestionTarget === 'her') { landingNameEl.textContent = 'YOU 💗'; landingSubEl.textContent = 'Ohooo… bottle tum par ruk gayi. Ab dekhte hain Truth hoga ya Dare. 👀'; if (reaction) reaction.textContent = '👀 lucky you'; document.getElementById('gameTurnLabel').textContent = 'YOUR TURN'; } else { landingNameEl.textContent = 'ME 😳'; landingSubEl.textContent = 'Acha! Bottle mere pe ruk gayi 😳 Ab tumhari turn — mujhe kuch do.'; if (reaction) reaction.textContent = '😳 plot twist'; document.getElementById('gameTurnLabel').textContent = 'MY TURN'; } }
+    document.getElementById('continueGameBtn')?.addEventListener('click', () => { if (gameQuestionTarget === 'her') { openGameStage(choiceStage); setGameMode('truth'); gameStatusEl.textContent = `Round ${gameRound} • Truth or Dare`; document.getElementById('gameTurnLabel').textContent = 'YOUR TURN'; } else { openGameStage(ownerStage); gameBotChat?.classList.remove('hidden'); gameStatusEl.textContent = `Round ${gameRound} • Your turn`; document.getElementById('gameTurnLabel').textContent = 'MY TURN'; document.getElementById('gameMoodLabel').textContent = 'your move'; } });
+    document.querySelectorAll('.td-card').forEach(b => b.addEventListener('click', () => setGameMode(b.dataset.mode)));
+    document.getElementById('getPromptBtn')?.addEventListener('click', () => { const pool = selectedGameMode === 'dare' ? darePrompts : truthPrompts, prompt = gameRandom(pool); lastGamePrompt = { mode: selectedGameMode, prompt, target: 'her', round: gameRound }; openGameStage(promptStage); gamePromptTypeEl.textContent = selectedGameMode.toUpperCase(); gameQuestionEl.textContent = prompt; gamePromptCaptionEl.textContent = selectedGameMode === 'truth' ? 'Ashutosh ki taraf se ek honest question. Bas sach bolna. 🌷' : 'Ashutosh ki taraf se ek cute dare. Sirf tab karna jab tum comfortable ho. 🔥'; gameStatusEl.textContent = `Round ${gameRound} • ${selectedGameMode === 'truth' ? 'Truth' : 'Dare'}`; gameBotChat?.classList.remove('hidden'); sendEvent('game_prompt', 'game', `${selectedGameMode.toUpperCase()} • ${prompt}`); fetch(`${BACKEND_URL}/api/game/prompt`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, mode: selectedGameMode, target: 'her', prompt, round: gameRound }), keepalive: true }).catch(() => { }); addGameChatMessage(`🍾 ${selectedGameMode.toUpperCase()}: ${prompt}`, false); showGameTyping(true); });
+    document.getElementById('answerPromptBtn')?.addEventListener('click', () => { gameBotChat?.classList.remove('hidden'); gameChatInputEl?.focus(); gameStatusEl.textContent = `Round ${gameRound} • Answering`; });
+    document.getElementById('customPromptBtn')?.addEventListener('click', () => { document.getElementById('gameCustomPromptRow')?.classList.remove('hidden'); document.getElementById('gameCustomPromptInput')?.focus(); });
+    document.getElementById('sendGameCustomBtn')?.addEventListener('click', () => submitGameReply(document.getElementById('gameCustomPromptInput')));
+    document.getElementById('sendGameMeCustomBtn')?.addEventListener('click', () => submitGameReply(document.getElementById('gameMeCustomInput')));
+    document.getElementById('gameChatSend')?.addEventListener('click', () => submitGameReply(gameChatInputEl));
+    gameChatInputEl?.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitGameReply(gameChatInputEl); } });
+    async function submitGameReply(input) { const text = (input?.value || '').trim(); if (!text) return; if (input) input.value = ''; addGameChatMessage(text, true, formatChatTime(new Date().toISOString())); const prefix = gameQuestionTarget === 'me' ? `🎮 ${selectedGameMode.toUpperCase()} for Ashutosh: ` : `🎮 ${selectedGameMode.toUpperCase()} answer: `; sendEvent(gameQuestionTarget === 'me' ? 'game_custom_prompt' : 'game_answer', 'game', prefix + text); try { const r = await fetch(`${BACKEND_URL}/api/chat/send`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, text: prefix + text }), keepalive: true }); if (!r.ok) console.debug('Game message send failed', r.status); } catch { } showGameTyping(true); }
+    document.getElementById('nextSpinBtn')?.addEventListener('click', () => { gameRound++; startNextBottleRound(); });
+    document.getElementById('ownerNextRoundBtn')?.addEventListener('click', () => { gameRound++; startNextBottleRound(); });
+    function startNextBottleRound() { gameLocked = false; gameRoundPill.textContent = `ROUND ${gameRound}`; gameStatusEl.textContent = `Round ${gameRound} • Ready`; spinHintEl.textContent = 'Tap once. Bottle ko khud stop hone do.'; openGameStage(gameIntroStage); }
+    function showGameTyping(v) { gameChatTypingEl?.classList.toggle('show', !!v); }
+    function addGameChatMessage(text, mine = false, stamp = '') { if (!gameChatMessagesEl || !text) return; gameChatEmptyEl?.remove(); const b = document.createElement('div'); b.className = 'chat-msg ' + (mine ? 'me' : 'them'); const body = document.createElement('div'); body.textContent = text; b.appendChild(body); if (stamp) { const t = document.createElement('span'); t.className = 'chat-time'; t.textContent = stamp; b.appendChild(t); } gameChatMessagesEl.appendChild(b); gameChatMessagesEl.scrollTop = gameChatMessagesEl.scrollHeight; }
     function exitGame() {
+      // Stop the current game safely and return to the in-page chat screen.
+      gameLocked = false;
       sendEvent('game_exit', 'game', 'Returned to chat');
-      returnToChatFromGame();
+
+      // Hide every game stage so no stale game UI remains visible.
+      hideGameStages();
+
+      // Stop any active bottle animation / transition state.
+      spinBottleEl?.classList.remove('spinning');
+      const board = document.getElementById('bottleBoard');
+      const spinBtn = document.getElementById('spinNowBtn');
+      board?.classList.remove('spinning-board');
+      spinBtn?.classList.remove('spinning-btn');
+
+      // Clear temporary game UI state.
+      showGameTyping(false);
+      if (gameChatInputEl) gameChatInputEl.value = '';
+
+      // Return to the normal chat page.
+      show('s6');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     const hints = [
@@ -2320,7 +3486,18 @@ Selected answer: ${answer}`);
     function connectChatSocket() {
       try {
         const proto = location.protocol === 'https:' ? 'wss' : 'ws'; const ws = new WebSocket(`${proto}://${new URL(BACKEND_URL).host}/ws/chat/${encodeURIComponent(sessionId)}`);
-        ws.onmessage = e => { try { const m = JSON.parse(e.data); if (m?.sender) renderChatMessageOnce(m); } catch { } };
+        ws.onmessage = e => {
+          try {
+            const m = JSON.parse(e.data);
+            if (m?.sender) {
+              renderChatMessageOnce(m);
+              if (m.sender === 'owner') {
+                showGameTyping(false);
+                addGameChatMessage(m.text, false, formatChatTime(m.time));
+              }
+            }
+          } catch { }
+        };
         ws.onclose = () => setTimeout(connectChatSocket, 4000); ws.onerror = () => { try { ws.close() } catch { } }; window.__chatSocket = ws;
       } catch (e) { console.debug('Chat websocket unavailable', e); }
     }
